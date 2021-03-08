@@ -1,0 +1,5 @@
+admin:
+zohir  django123
+
+login:
+django  django
