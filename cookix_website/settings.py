@@ -14,8 +14,8 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+#BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'recipes.apps.RecipesConfig',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Import
+    'import_export',
+    # Custom
+    'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +60,7 @@ ROOT_URLCONF = 'cookix_website.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['cookix_website/templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,23 +78,49 @@ WSGI_APPLICATION = 'cookix_website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'd4j6om349hq08t',
+        'USER': 'hgjbyumaqoclts',
+        'PASSWORD': 'adc5c95d9f3fd01dd98c965887e87b05921de42cfaee2e1ca807e0b35f259e3e',
+        'HOST': 'ec2-34-240-75-196.eu-west-1.compute.amazonaws.com',
+        'PORT': '5432',
+    }
+}
+'''
 
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'cookixdb',
 #         'USER': 'postgres',
-#         'PASSWORD': 'django123',
-#         'HOST': 'localhost',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'cookixdb.c8sg6yn04dvc.us-east-1.rds.amazonaws.com',
 #         'PORT': '5432',
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'cookixdb2',
+#         'USER': 'cookix',
+#         'PASSWORD': 'cookix123',
+#         'HOST': 'cookixdb2.c8sg6yn04dvc.us-east-1.rds.amazonaws.com',
+#         'PORT': '3306',
+#     }
+# }
+
+
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+     'default': {
+         'ENGINE': 'django.db.backends.sqlite3',
+         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+     }
 }
 
 
