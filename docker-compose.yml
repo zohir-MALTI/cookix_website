@@ -1,20 +1,5 @@
 version: "2.0"
 services:
-  db:
-    container_name: cookix_db
-    restart: always
-    image: postgres:10.0
-    ports:
-      - 5432:5432
-    volumes:
-      - ./data:/var/lib/postgresql/data:rw
-    environment:
-      - POSTGRES_DB=cookix_db
-      - POSTGRES_USER=cookix_user_db
-      - POSTGRES_PASSWORD=f9d6UVP6gxEqueopMCiKdpjC0A5Pi5Ww
-    networks:
-      - nginx_net
-
   django:
     container_name: cookix
     image: cookix/cookix:1.0
@@ -26,14 +11,6 @@ services:
       - .:/code
       - django_admin:/usr/local/lib/python3.8/site-packages/django/contrib/admin/static
     ports:
-      - "0.0.0.0:8000:8000"
-    depends_on:
-      - db
-    networks:
-      - nginx_net
-networks:
-  nginx_net:
-    driver: bridge
-
+      - "8000:8000"
 volumes:
   django_admin:

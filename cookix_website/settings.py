@@ -129,8 +129,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cookix_db',
         'USER': 'cookix_user_db',
-        'PASSWORD':'f9d6UVP6gxEqueopMCiKdpjC0A5Pi5Ww',
-        'HOST': 'db',
+        'PASSWORD': 'f9d6UVP6gxEqueopMCiKdpjC0A5Pi5Ww',
+        'HOST': '157.230.24.228',
         'PORT': 5432,
     }
 }
