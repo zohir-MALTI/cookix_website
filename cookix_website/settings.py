@@ -26,7 +26,7 @@ SECRET_KEY = 'hl928-7slny@bpytrycuzgjew!-we1!_u_p%p1e(&+mrfg@6l8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -115,15 +115,25 @@ DATABASES = {
 
 
 
-
+"""
 DATABASES = {
      'default': {
          'ENGINE': 'django.db.backends.sqlite3',
          'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
      }
 }
+"""
 
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cookix_db',
+        'USER': 'cookix_user_db',
+        'PASSWORD':'f9d6UVP6gxEqueopMCiKdpjC0A5Pi5Ww',
+        'HOST': 'db',
+        'PORT': 5432,
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
