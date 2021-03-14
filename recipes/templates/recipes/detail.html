@@ -1,0 +1,57 @@
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-8">
+    <img src="{{ recipe.image }}" class="img-fluid" />
+  </div>
+  <div class="col-2">
+    <a href="javascript:{document.getElementById('add_like').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> likes {{ recipe.users_likes }}</button></a>
+  </div>
+  <div class="col-2">
+    <a href="javascript:{document.getElementById('add_dislike').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> Dislikes {{ recipe.users_dislikes }}</button></a>
+  </div>
+</div>
+
+<div class="row pt-2">
+  <div class="col-4">
+    <h4><span class="oi oi-magnifying-glass"></span> {{ recipe.title }}</h4>
+  </div>
+  <div class="col-4 text-right">
+    <h4><span class="oi oi-clock"></span> {{ recipe.price_per_serving }}</h4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-8">
+    <p>{{ recipe.summary }}</p>
+  </div>
+</div>
+
+{% if steps %}
+<h2>Steps:</h2>
+<div class="row">
+  <div class="col-12">
+    <ol>
+{% for step in steps %}
+    <li>{{ step }}</li>
+{% endfor %}
+      </ol>
+  </div>
+</div>
+{% endif %}
+
+
+
+<form id="add_like" method="POST" action="{% url 'add_like' recipe.id %}">
+  {% csrf_token%}
+  <input type="hidden">
+</form>
+
+<form id="add_dislike" method="POST" action="{% url 'add_dislike' recipe.id %}">
+  {% csrf_token%}
+  <input type="hidden">
+</form>
+
+{% endblock %}

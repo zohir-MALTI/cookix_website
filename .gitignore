@@ -4,8 +4,8 @@ data/
 *.log
 *.pot
 *.pyc
-__pycache__/
-
+cookix_website/__pycache__/
+recipes/__pycache__/
 local_settings.py
 db.sqlite3
 /media

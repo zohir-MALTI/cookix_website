@@ -1,8 +1,25 @@
-{% extends 'base.html' %}
+{% extends 'recipes/base.html' %}
 
 {% block content %}
 
-    HOMEEE!
+{% for recipe in recipes %}
+<div class="row pt-3">
+  <div class="col-2" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+    <img src="{{ recipe.spoonacular_sourceUrl }}" class="img-fluid" />
+  </div>
+  <div class="col-6" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+    <h1>{{ recipe.title }}</h1>
+    <p>{{ recipe.summary_of_summary }}</p>
+  </div>
+  <div class="col-4">
+    <a href="javascript:{document.getElementById('add_like{{ recipe.id }}').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> Likes {{ recipe.users_likes }}</button></a>
+  </div>
+</div>
+
+<form id="add_like{{ recipe.id }}" method="POST" action="{% url 'add_like' recipe.id %}">
+  {% csrf_token%}
+  <input type="hidden">
+</form>
+{% endfor %}
 
 {% endblock %}
-
