@@ -2,13 +2,43 @@
 
 {% block content %}
 
+
+<div class="input-group">
+  <form method="POST"  action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="search" class="form-control rounded" placeholder="recipe name" aria-label="Search"
+    aria-describedby="search-addon" name="search" />
+        <button type="button" class="btn btn-secondary"><span class="oi oi-magnifying-glass"></span></button>
+    </form>
+</div>
+
+
+<div class="card-group">
+  {% for recipe in recipes %}
+  <div class="card border-warning col-lg-6">
+    <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+    <div class="card-body pb0">
+      <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h5>
+      <hr width="90%">
+      <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
+    </div>
+     <div class="card-footer border-warning bt0">
+       <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min / </span>
+       <span> {{ recipe.price_per_serving }}$</span>
+     </div>
+  </div>
+  {% endfor %}
+</div>
+
+
+
 {% for recipe in recipes %}
 <div class="row pt-3">
-  <div class="col-2" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-    <img src="{{ recipe.spoonacular_sourceUrl }}" class="img-fluid" />
+  <div class="col-2">
+    <img src="{{ recipe.image }}" class="img-fluid" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;" />
   </div>
-  <div class="col-6" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-    <h1>{{ recipe.title }}</h1>
+  <div class="col-6" >
+    <h4 onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h4>
     <p>{{ recipe.summary_of_summary }}</p>
   </div>
   <div class="col-4">

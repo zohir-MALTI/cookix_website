@@ -6,7 +6,7 @@ services:
     build: ./build
     #command: gunicorn cookix_website.wsgi:application -b :8000
     command: python manage.py runserver 0.0.0.0:8000
-    restart: always
+    #restart: always
     volumes:
       - .:/code
       - django_admin:/usr/local/lib/python3.8/site-packages/django/contrib/admin/static

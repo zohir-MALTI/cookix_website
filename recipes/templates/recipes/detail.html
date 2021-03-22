@@ -1,46 +1,133 @@
 {% extends 'recipes/base.html' %}
 
+<!--https://www.regal.fr/recettes/plats/roti-de-porc-farci-au-reblochon-en-croute-de-jambon-cru-18250-->
+<!--https://www.hervecuisine.com/recette/recette-des-crepes-sans-oeuf-et-sans-lactose/-->
+<!--https://www.supertoinette.com/recette/4860/endives-gratinees-au-maroilles.html?diaporama=319-->
+<!--https://www.cuisine-etudiant.fr/recette/8164-mac-and-cheese-->
+
+
+
+
 {% block content %}
 
-<div class="row">
-  <div class="col-8">
+<h3>{{ recipe.title }}</h3>
+
+<div class="row mt6">
+  <div class="col-6">
     <img src="{{ recipe.image }}" class="img-fluid" />
   </div>
-  <div class="col-2">
-    <a href="javascript:{document.getElementById('add_like').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> likes {{ recipe.users_likes }}</button></a>
-  </div>
-  <div class="col-2">
-    <a href="javascript:{document.getElementById('add_dislike').submit()}"><button class="btn btn-primary btn-lg btn-block"><span class="oi oi-caret-top"></span> Dislikes {{ recipe.users_dislikes }}</button></a>
+  <div class="col-6">
+    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min</span><br>
+    <span><span class="oi oi-dollar"></span> {{ recipe.price_per_serving }} per serving</span><br>
+    <div class="progress">
+      <div class="progress-bar bg-info" role="progressbar" style="width: {{ recipe.health_score }}%;"  aria-valuemin="0" aria-valuemax="100"><span class="oi oi-heart"> {{ recipe.health_score }}% </span></div>
+    </div><br>
+    <div class="progress">
+      <div class="progress-bar bg-info" role="progressbar" style="width: {{ recipe.spoonacular_score }}%;"  aria-valuemin="0" aria-valuemax="100"><span class="oi oi-badge"> {{ recipe.spoonacular_score }}% </span></div>
+    </div>
+    <span><span class="oi oi-heart"></span> {{ recipe.health_score }}%</span><br>
+    <span><span class="oi oi-badge"></span> {{ recipe.spoonacular_score }}%</span>
+    <div class="row">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-success"><a href="javascript:{document.getElementById('add_like').submit()}"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ recipe.users_likes }}</span></a></button>
+        <button type="button" class="btn btn-danger"><a href="javascript:{document.getElementById('add_dislike').submit()}"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ recipe.users_dislikes }}</span></a></button>
+      </div>
+      <div class="col-3"></div>
+      <div class="col-1">
+
+      </div>
+      <div class="col-1">
+
+      </div>
+    </div>
+    <div class="row">
+      {% for tag in tags %}
+      <span class="badge rounded-pill bg-warning">{{ tag }}</span>
+      {% endfor %}
+    </div>
   </div>
 </div>
+
+
 
 <div class="row pt-2">
-  <div class="col-4">
-    <h4><span class="oi oi-magnifying-glass"></span> {{ recipe.title }}</h4>
+  <div class="col-3">
+    {% if equipments %}
+    <h2>Equipments:</h2>
+    <div class="row">
+      <div class="col-12">
+        <ul>
+    {% for equipment in equipments %}
+        <li>{{ equipment }}</li>
+    {% endfor %}
+          </ul>
+      </div>
+    </div>
+    {% endif %}
   </div>
-  <div class="col-4 text-right">
-    <h4><span class="oi oi-clock"></span> {{ recipe.price_per_serving }}</h4>
+  <div class="col-9 mt-4 pt-4 text-justify">
+    <p>{{ summary }}</p>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-8">
-    <p>{{ recipe.summary }}</p>
+
+<hr width="80%">
+
+<div class="row pt-2">
+  <div class="col-5">
+    {% if ingredients %}
+    <h2>Ingredients:</h2>
+    <div class="row">
+      <div class="col-12">
+        <ul>
+    {% for ingredient in ingredients %}
+        <li>{{ ingredient }}</li>
+    {% endfor %}
+          </ul>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-7">
+    {% if steps %}
+    <h2>Steps:</h2>
+    <div class="row">
+      <div class="col-12">
+        <ol>
+    {% for step in steps %}
+        <li>{{ step }}</li>
+    {% endfor %}
+          </ol>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 
-{% if steps %}
-<h2>Steps:</h2>
-<div class="row">
-  <div class="col-12">
-    <ol>
-{% for step in steps %}
-    <li>{{ step }}</li>
-{% endfor %}
-      </ol>
+
+<hr width="80%">
+
+
+
+
+<h2>Recommended recipes:</h2>
+<div class="card-group">
+  {% for recommended_recipe in recommended_recipes %}
+  <div class="card border-warning">
+    <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
+    <div class="card-body pb0">
+      <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
+      <hr width="90%">
+      <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
+    </div>
+     <div class="card-footer border-warning bt0">
+       <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
+       <span> {{ recommended_recipe.price_per_serving }}$</span>
+     </div>
   </div>
+  {% endfor %}
 </div>
-{% endif %}
 
 
 

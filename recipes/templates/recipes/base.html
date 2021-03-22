@@ -21,8 +21,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">
-<!--      <img src="{% static 'logo.png' %}" height=60 class="d-inline-block alighn-top" />-->
-      <img src="" height=60 class="d-inline-block alighn-top" />
+      <img src="{% static 'logo.png' %}" height=60 class="d-inline-block alighn-top" />
+<!--      <img src="" height=60 class="d-inline-block alighn-top" />-->
       Cookixxxx
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,11 +54,38 @@
 
   </div>
 
-  <footer class="text-muted">
-    <div class="container text-center">
-      <p>Have a happy {% now "Y" %}</p>
-      </div>
-  </footer>
+
+
+
+
+
+
+
+
+<footer class="bg-dark text-center text-white mt-6 pt-6">
+  <div class="container ">
+
+    <!-- Section: Text -->
+    <section class="mt-4 mb-4">
+      <p>
+        Cookix is a french plateform for cooking recipes customized for each user
+        based on his culinary tastes.
+      </p>
+
+    </section>
+
+
+  </div>
+  <!-- Grid container -->
+
+  <!-- Copyright -->
+  <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+    © {% now "Y" %} Copyright:
+    <a class="text-white" href="cookix.tcp4.me:8000/">cookix.me</a>
+  </div>
+  <!-- Copyright -->
+</footer>
+<!-- Footer -->
 
   <!-- Bootstrap core JavaScript
   ================================================== -->

@@ -38,6 +38,8 @@ class Recipe(models.Model):
         return self.title
 
     def summary_of_summary(self):
-        return self.summary[:100]
+        if len(self.summary) > 130:
+            return self.summary[:130]+"..."
+        return self.summary
 
 
