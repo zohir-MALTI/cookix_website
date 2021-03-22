@@ -17,10 +17,9 @@ import os
 #BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
-print(TEMPLATES_DIR)
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
-STATIC_ROOT= os.path.join(BASE_DIR, "recipes/static")
-MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, "recipes/static")
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Quick-start development settings - unsuitable for production

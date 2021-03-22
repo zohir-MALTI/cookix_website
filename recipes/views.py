@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Recipe
 
-@login_required
+
 def home(request):
     recipes = Recipe.objects.all()
     # print(len(recipes))
@@ -54,6 +54,8 @@ def detail(request, recipe_id):
     return render(request, 'recipes/detail.html', {'recipe': recipe, 'steps': steps, 'equipments': equipments, 'summary': summary,
                                                    'ingredients': ingredients, 'dish_types': dish_types, 'tags': tags,
                                                    'recommended_recipes': recommended_recipes})
+
+
 
 
 @login_required(login_url="/accounts/signup")
