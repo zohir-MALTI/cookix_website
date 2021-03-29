@@ -1,10 +1,53 @@
-{% extends 'recipes/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
+
+
+<h5>Today's special</h5>
+
+<div class="card flex-row flex-wrap">
+  <div class="card-header border-0">
+    <img src="{{ todays_special.image }}" width="200" class="card-img-top" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">
+  </div>
+  <div class="card-block px-2">
+    <h4 class="card-title" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">{{ todays_special.title }}</h4>
+    <p class="card-text">{{ todays_special.summary }}</p>
+  </div>
+  <div class="w-100"></div>
+  <div class="card-footer w-100 text-muted">
+    <span><span class="oi oi-clock"></span> {{ todays_special.ready_in_minutes }}min / </span>
+    <span> {{ todays_special.price_per_serving }}$</span>
+  </div>
+</div>
+
+<br>
+<br>
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Did you know that Interior is responsible for the development of renewable energy resources on the Outer Continental Shelf? To learn more about the lifecycle of offshore renewable energy visit: <a href="https://t.co/otuk0nyiry">https://t.co/otuk0nyiry</a> <a href="https://t.co/y28WovdaKy">pic.twitter.com/y28WovdaKy</a></p>&mdash; US Department of the Interior (@Interior) <a href="https://twitter.com/Interior/status/1375106996823805953?ref_src=twsrc%5Etfw">March 25, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<br>
+<br>
+
+<div class="card flex-row flex-wrap">
+  <img src="{{ todays_special.image }}" class="card-img-top" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">
+  <div class="card-body pb0">
+    <h5 class="card-title" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">{{ todays_special.title }}</h5>
+    <hr width="90%">
+    <p class="card-text pt0"><small>{{ todays_special.summary_of_summary }}</small></p>
+  </div>
+  <div class="card-footer border-warning bt0">
+    <span><span class="oi oi-clock"></span> {{ todays_special.ready_in_minutes }}min / </span>
+    <span> {{ todays_special.price_per_serving }}$</span>
+  </div>
+</div>
+
+<br>
+
+
+<h5>Let's find out the best recipes among our {{ recipes_count }} recipes ...</h5><br>
+
 <div class="col-12">
   <div class="mx-auto">
     <div class="input-group">
-      <form method="POST" action="{% url 'login' %}">
+      <form method="GET" action="{% url 'search' %}">
         {% csrf_token %}
         <input type="search" class="form-control rounded" placeholder="recipe name" aria-label="Search"
                aria-describedby="search-addon" name="search" />

@@ -7,4 +7,6 @@ urlpatterns = [
     path('<int:recipe_id>', views.detail, name='detail'),
     path('<int:recipe_id>/add_like', views.add_like, name='add_like'),
     path('<int:recipe_id>/add_dislike', views.add_dislike, name='add_dislike'),
+    path('search', views.search, name='search'),
+    path('favorites', views.favorites, name='favorites'),
 ]

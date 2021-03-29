@@ -1,15 +1,28 @@
 import re
-
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Recipe
 
 
 def home(request):
+    recipes = Recipe.objects.all()[4000:4009]
+    print("aaaaa",recipes)
+    print("type ",type(recipes))
+    print("len ",len(recipes))
+    recipes_count = len(recipes)
+    recipes_min = recipes[:10]
+    # print(len(recipes))
+    # print(len(recipes))
+    return render(request, 'recipes/home.html', {'recipes': recipes_min,
+                                                 'recipes_count': recipes_count,
+                                                 'todays_special': recipes_min[0]})
+
+
+def favorites(request):
     recipes = Recipe.objects.all()
-    # print(len(recipes))
     recipes = recipes[4000:4006]
-    # print(len(recipes))
     return render(request, 'recipes/home.html', {'recipes': recipes})
 
 
@@ -55,9 +68,6 @@ def detail(request, recipe_id):
                                                    'ingredients': ingredients, 'dish_types': dish_types, 'tags': tags,
                                                    'recommended_recipes': recommended_recipes})
 
-
-
-
 @login_required(login_url="/accounts/signup")
 def add_like(request, recipe_id):
     if request.method == 'POST':
@@ -76,3 +86,27 @@ def add_dislike(request, recipe_id):
         return redirect('/'+str(recipe.id))
 
 
+def search(request):
+    if request.method == 'GET':
+        keys = request.GET.get("search")
+        print("keys:" ,keys)
+        page_number = request.GET.get("page")
+        recipes = Recipe.objects.all()\
+            .annotate(search = SearchVector('title', 'ingredients', 'summary', 'cuisines', 'equipments'))\
+            .filter(title__icontains=keys)  # filter(search='cheese')  / filter(body_text__search='cheese')
+        paginator = Paginator(recipes, 3)
+        try:
+            recipes_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            recipes_obj = paginator.get_page(1)
+        except EmptyPage:
+            recipes_obj = paginator.get_page(1)
+
+        recipes2 = SearchQuery(keys, search_type='raw')
+
+        print("recipes_obj:" ,recipes_obj)
+        print("recipes2:" ,recipes2)
+        # print("count:" ,Recipe.recipes_count())
+        # return redirect('/'+str(recipe.id))
+        return render(request, 'recipes/search.html', {'recipes': recipes_obj, 'result_count': len(recipes),
+                                                       'query': keys})
