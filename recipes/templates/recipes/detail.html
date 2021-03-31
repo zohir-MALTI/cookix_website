@@ -29,8 +29,8 @@
     <span><span class="oi oi-badge"></span> {{ recipe.spoonacular_score }}%</span>
     <div class="row">
       <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-success"><a href="javascript:{document.getElementById('add_like').submit()}"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ recipe.users_likes }}</span></a></button>
-        <button type="button" class="btn btn-danger"><a href="javascript:{document.getElementById('add_dislike').submit()}"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ recipe.users_dislikes }}</span></a></button>
+        <button type="button" class="btn btn-success"><a href="javascript:{document.getElementById('add_like').submit()}"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
+        <button type="button" class="btn btn-danger"><a href="javascript:{document.getElementById('add_dislike').submit()}"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
       </div>
       <div class="col-3"></div>
       <div class="col-1">

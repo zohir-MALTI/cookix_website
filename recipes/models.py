@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # percent_protein  percent_carbs percent_fat calories    saturated_fat_g carbohydrates_g
 # sugar_g cholesterol_mg sodium_mg protein_g
@@ -31,8 +32,6 @@ class Recipe(models.Model):
     summary = models.TextField(blank=True)
     equipments = models.TextField(blank=True)
     steps = models.TextField(blank=True)
-    users_likes = models.IntegerField(default=0)
-    users_dislikes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
@@ -42,4 +41,17 @@ class Recipe(models.Model):
             return self.summary[:130]+"..."
         return self.summary
 
+    def recipes_count(self):
+        return self.title.count()
 
+
+class Likes(models.Model):
+    user_id   = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    like_date = models.DateTimeField(auto_now_add=True)
+
+
+class Dislikes(models.Model):
+    user_id   = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    dislike_date = models.DateTimeField(auto_now_add=True)
