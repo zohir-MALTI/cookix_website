@@ -8,6 +8,6 @@ urlpatterns = [
     # path('', views.home, name='home'),
     path('', include('recipes.urls')),
     path('accounts/', include('accounts.urls')),
-    path('accounts/', include('accounts.urls')),
+    # path('accounts/', include('accounts.urls')),
     # path('recipes/', include('recipes.urls')),
 ]

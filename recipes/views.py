@@ -4,6 +4,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import *
+from django.db.models import Q
+
 
 
 def home(request):
@@ -116,10 +118,14 @@ def search(request):
         keys = request.GET.get("search")
         print("keys:" ,keys)
         page_number = request.GET.get("page")
-        recipes = Recipe.objects.all() \
-            .annotate(search = SearchVector('title', 'ingredients', 'summary', 'cuisines', 'equipments')) \
-            .filter(title__icontains=keys)  # filter(search='cheese')  / filter(body_text__search='cheese')
-        paginator = Paginator(recipes, 3)
+        recipes = Recipe.objects.filter(
+                                Q(title__icontains=keys) |
+                                Q(ingredients__icontains=keys) |
+                                Q(equipments__icontains=keys)
+                        )  # filter(search='cheese')  / filter(body_text__search='cheese')
+
+            #.annotate(search = SearchVector('title', 'ingredients', 'summary', 'cuisines', 'equipments')) \
+        paginator = Paginator(recipes, 12)
         try:
             recipes_obj = paginator.get_page(page_number)
         except PageNotAnInteger:
