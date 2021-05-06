@@ -1,3 +1,20 @@
+small {
+  white-space: normal;
+}
+
+.scrollhor {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.card-body-home {
+  height: 170px;
+}
+
+.card {
+  display: inline-table ;
+}
+
 label:before {
   content: url("https://cdn1.iconfinder.com/data/icons/windows8_icons_iconpharm/26/unchecked_checkbox.png");
   position: absolute;

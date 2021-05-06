@@ -5,9 +5,6 @@
 <!--https://www.supertoinette.com/recette/4860/endives-gratinees-au-maroilles.html?diaporama=319-->
 <!--https://www.cuisine-etudiant.fr/recette/8164-mac-and-cheese-->
 
-
-
-
 {% block content %}
 
 <h3>{{ recipe.title }}</h3>
@@ -40,14 +37,22 @@
 
       </div>
     </div>
+    <br>
     <div class="row">
       {% for tag in tags %}
       <span class="badge rounded-pill bg-warning">{{ tag }}</span>
       {% endfor %}
     </div>
+    <br>
+    <div class="row">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <p>On twitter</p>
+        <button type="button" class="btn btn-success"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_pct }}</span></button>
+        <button type="button" class="btn btn-danger"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ hates_pct }}</span></button>
+      </div>
+    </div>
   </div>
 </div>
-
 
 
 <div class="row pt-2">
@@ -57,10 +62,10 @@
     <div class="row">
       <div class="col-12">
         <ul>
-    {% for equipment in equipments %}
-        <li>{{ equipment }}</li>
-    {% endfor %}
-          </ul>
+          {% for equipment in equipments %}
+          <li>{{ equipment }}</li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
     {% endif %}
@@ -73,32 +78,32 @@
 
 <hr width="80%">
 
-<div class="row pt-2">
-  <div class="col-5">
+<div class="row">
+  <div class="col-6">
     {% if ingredients %}
     <h2>Ingredients:</h2>
     <div class="row">
       <div class="col-12">
         <ul>
-    {% for ingredient in ingredients %}
-        <li>{{ ingredient }}</li>
-    {% endfor %}
-          </ul>
+          {% for ingredient in ingredients %}
+          <li>{{ ingredient }}</li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
     {% endif %}
   </div>
 
-  <div class="col-7">
+  <div class="col-6">
     {% if steps %}
     <h2>Steps:</h2>
     <div class="row">
       <div class="col-12">
         <ol>
-    {% for step in steps %}
-        <li>{{ step }}</li>
-    {% endfor %}
-          </ol>
+          {% for step in steps %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
       </div>
     </div>
     {% endif %}
@@ -108,23 +113,37 @@
 
 <hr width="80%">
 
+<div class="row">
+  <div class="col-sm-12 col-md-6 col-lg-3">
+    <iframe border=0 frameborder=0 height=250 width=400
+            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+  </div>
+  <div class="col-sm-12 col-md-6 col-lg-4">
+    <iframe border=0 frameborder=0 height=250 width=400
+            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+  </div>
+  <div class="col-sm-12 col-md-6 col-lg-4">
+    <iframe border=0 frameborder=0 height=250 width=400
+            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+  </div>
+</div>
 
 
 
 <h2>Recommended recipes:</h2>
-<div class="card-group">
+<div class="row">
   {% for recommended_recipe in recommended_recipes %}
-  <div class="card border-warning">
+  <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
     <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
     <div class="card-body pb0">
       <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
       <hr width="90%">
       <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
     </div>
-     <div class="card-footer border-warning bt0">
-       <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
-       <span> {{ recommended_recipe.price_per_serving }}$</span>
-     </div>
+    <div class="card-footer border-warning bt0">
+      <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
+      <span> {{ recommended_recipe.price_per_serving }}$</span>
+    </div>
   </div>
   {% endfor %}
 </div>

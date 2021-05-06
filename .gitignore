@@ -11,3 +11,5 @@ db.sqlite3
 /media
 .idea/
 static/admin
+recipes_by_ing_df.csv
+recommendation_classifier.pickle

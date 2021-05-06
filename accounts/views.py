@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from .models import UserPreferences
 
+
 def signup(request):
     if request.method == 'POST':
         if request.POST["password1"] == request.POST["password2"]:

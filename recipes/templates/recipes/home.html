@@ -2,9 +2,26 @@
 
 {% block content %}
 
-
-
 <h5>Let's find out the best recipes among our <b>{{ recipes_count }}</b> recipes ...</h5><br>
+
+<h1>Our selections for you:</h1>
+{% for cluster_num, suggested_recipes in clusters.items %}
+<h2>Selection {{ cluster_num }}</h2>
+<div class="scrollhor">
+  {% for recipe in suggested_recipes %}
+
+  <div class="card border-warning col-sm-4 col-md-3 col-lg-2">
+    <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+    <div class="card-body pb0 card-body-home">
+      <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+
+
 
 
 <h5>Today's special</h5>

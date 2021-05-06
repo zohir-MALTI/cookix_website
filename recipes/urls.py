@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:recipe_id>/add_dislike', views.add_dislike, name='add_dislike'),
     path('search', views.search, name='search'),
     path('favorites', views.favorites, name='favorites'),
+    # path('recommend', views.recommend_recipes, name='recommend'),
 ]
