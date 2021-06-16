@@ -2,89 +2,91 @@
 
 {% block content %}
 
-<h5>Let's find out the best recipes among our <b>{{ recipes_count }}</b> recipes ...</h5><br>
+    <br>
+    <h1 align="center">Let's find out the best recipes among our <b style="color: #ffbf29">{{ recipes_count }}</b> recipes ...</h1><br>
 
-<h1>Our selections for you:</h1>
-{% for cluster_num, suggested_recipes in clusters.items %}
-<h2>Selection {{ cluster_num }}</h2>
-<div class="scrollhor">
-  {% for recipe in suggested_recipes %}
+    <form method="GET" action="{% url 'search' %}">
+        <div class="input-group search-from">
+            {% csrf_token %}
+            <input type="search" name="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                   aria-describedby="search-addon" />
+            <button type="submit" class="btn btn-outline-warning"><span class="oi oi-magnifying-glass"></span> Search</button>
+        </div>
+    </form>
 
-  <div class="card border-warning col-sm-4 col-md-3 col-lg-2">
-    <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-    <div class="card-body pb0 card-body-home">
-      <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
+    <br>
+
+    <div class="todays-special " style="">
+        <div class="text-on-todays-special">
+            <h3 style="color: #ffbf29;">Today's special</h3>
+            <div class="todays-special-summary">
+                <h5>{{ todays_special.title }}</h5>
+                <p>{{ todays_special.summary_of_summary }}</p>
+
+                <a onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;color: #ffbf29;" class="mt1"><b>READ MORE <span class="oi oi-chevron-right"></span></b></a>
+            </div>
+        </div>
+        <img src="{{ todays_special.image }}" width="100%" >
     </div>
-  </div>
-  {% endfor %}
-</div>
-{% endfor %}
+
+
+    <br>
+
+    {% if clusters is not None %}
+    <h1>Our selections for you:</h1>
+    {% endif %}
+    <br>
+    {% for cluster_num, suggested_recipes in clusters.items %}
+        <div class="row">
+            <div class="col-lg-2" style="align-self: center; color: #ffbf29; text-align: center">
+                <h2>Selection <br> {{ cluster_num }}</h2>
+            </div>
+            <div class="col-lg-10">
+                <div class="scrollhor">
+                    {% for recipe in suggested_recipes %}
+                        <div class="card  home-card border-warning col-sm-4 col-md-3 col-lg-2">
+                            <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+                            <div class="card-body pb0 ">
+                                <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <br><br>
 
 
 
-
-
-<h5>Today's special</h5>
-
-<div class="card flex-row flex-wrap">
-  <div class="card-header border-0">
-    <img src="{{ todays_special.image }}" width="200" class="card-img-top" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">
-  </div>
-  <div class="card-block px-2">
-    <h4 class="card-title" onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;">{{ todays_special.title }}</h4>
-    <p class="card-text">{{ todays_special.summary }}</p>
-  </div>
-  <div class="w-100"></div>
-  <div class="card-footer w-100 text-muted">
-    <span><span class="oi oi-clock"></span> {{ todays_special.ready_in_minutes }}min / </span>
-    <span> {{ todays_special.price_per_serving }}$</span>
-  </div>
-</div>
-
-<br>
-<!--<br>-->
-<!--<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Did you know that Interior is responsible for the development of renewable energy resources on the Outer Continental Shelf? To learn more about the lifecycle of offshore renewable energy visit: <a href="https://t.co/otuk0nyiry">https://t.co/otuk0nyiry</a> <a href="https://t.co/y28WovdaKy">pic.twitter.com/y28WovdaKy</a></p>&mdash; US Department of the Interior (@Interior) <a href="https://twitter.com/Interior/status/1375106996823805953?ref_src=twsrc%5Etfw">March 25, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>-->
-<!--<br>-->
-<br>
-
-
-
-<br>
-
-
-
-<div class="col-12">
-  <div class="mx-auto">
-    <div class="input-group">
-      <form method="GET" action="{% url 'search' %}">
-        {% csrf_token %}
-        <input type="search" class="form-control rounded" placeholder="recipe name" aria-label="Search"
-               aria-describedby="search-addon" name="search" />
-        <button type="button" class="btn btn-secondary"><span class="oi oi-magnifying-glass"></span></button>
-      </form>
+    <h2>Random recicpes :</h2>
+    <div class="row">
+        {% for recipe in recipes %}
+            <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
+                <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+                <div class="card-body pb0">
+                    <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h5>
+                    <hr width="90%">
+                    <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
+                </div>
+                <div class="card-footer border-warning bt0">
+                    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+                    <span style="float: right"> {{ recipe.price_per_serving }}$</span>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-  </div>
-</div>
 
 
-<div class="row">
-  {% for recipe in recipes %}
-  <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
-    <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-    <div class="card-body pb0">
-      <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h5>
-      <hr width="90%">
-      <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
     </div>
-    <div class="card-footer border-warning bt0">
-      <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min / </span>
-      <span> {{ recipe.price_per_serving }}$</span>
+    <div class="about-us-block">
+        <h2>The Cookix Team</h2>
+        <p>Cookix is a trusted resource for home cooks with more than 20,000 tested recipes, guides, and meal plans, drawing over 15 million readers each month from around the world. We’re supported by a group of recipe developers, food writers, recipe and product testers, photographers, and other creative professionals.</p>
+
+        <a href="{% url 'about_us' %}" class="mt1"><b>CONTACT US <span class="oi oi-chevron-right"></span></b></a>
+
     </div>
-  </div>
-  {% endfor %}
-</div>
-
-
 
 
 

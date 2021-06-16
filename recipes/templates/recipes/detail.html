@@ -7,157 +7,216 @@
 
 {% block content %}
 
-<h3>{{ recipe.title }}</h3>
+    <h3>{{ recipe.title }}</h3>
 
-<div class="row mt6">
-  <div class="col-6">
-    <img src="{{ recipe.image }}" class="img-fluid" />
-  </div>
-  <div class="col-6">
-    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min</span><br>
-    <span><span class="oi oi-dollar"></span> {{ recipe.price_per_serving }} per serving</span><br>
-    <div class="progress">
-      <div class="progress-bar bg-info" role="progressbar" style="width: {{ recipe.health_score }}%;"  aria-valuemin="0" aria-valuemax="100"><span class="oi oi-heart"> {{ recipe.health_score }}% </span></div>
-    </div><br>
-    <div class="progress">
-      <div class="progress-bar bg-info" role="progressbar" style="width: {{ recipe.spoonacular_score }}%;"  aria-valuemin="0" aria-valuemax="100"><span class="oi oi-badge"> {{ recipe.spoonacular_score }}% </span></div>
+
+    <div class="row mt6">
+        <div class="col-6">
+            <img src="{{ recipe.image }}" class="img-fluid" />
+        </div>
+        <div class="col-6">
+            <table class="table" style="text-align: center">
+                <thead>
+                <tr>
+                    <th>Preparation time</th>
+                    <th>Price per serving</th>
+                    <th>Health score</th>
+                    <th>Spoonacular score</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min</td>
+                    <td><span class="oi oi-dollar"></span> {{ recipe.price_per_serving }}</td>
+                    <td><span class="oi oi-heart"> {{ recipe.health_score }}%</td>
+                    <td><span class="oi oi-badge"> {{ recipe.spoonacular_score }}% </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="btn-group" role="group" aria-label="Basic example" style="width: 100%">
+                    <button type="button" class="btn btn-success" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
+                    <button type="button" class="btn btn-danger" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
+                </div>
+                <div class="col-3"></div>
+                <div class="col-1">
+
+                </div>
+                <div class="col-1">
+
+                </div>
+            </div>
+            <div class="row badges" style="justify-content: center">
+                {% for tag in tags %}
+                    <span class="badge rounded-pill bg-warning" style="margin-right: 10px;padding: 15px;">{{ tag }}</span>
+                {% endfor %}
+            </div>
+
+            <table class="table" style="text-align: center">
+                <thead>
+                <tr>
+                    <th>Twitter reviews about this recipe</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <div class="progress-bar {% if likes_pct < 30 %} bg-danger {% elif likes_pct < 70 %} bg-warning {% else %} bg-success {% endif %}" role="progressbar" aria-valuenow="{{ likes_pct }}"
+                             aria-valuemin="0" aria-valuemax="100" style="width:{{ likes_pct }}%">
+                            {{ likes_pct }}%
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
-    <span><span class="oi oi-heart"></span> {{ recipe.health_score }}%</span><br>
-    <span><span class="oi oi-badge"></span> {{ recipe.spoonacular_score }}%</span>
+
+
+    <div class="row pt-2">
+        <div class="col-3">
+            {% if equipments %}
+                <h2>Equipments:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ul>
+                            {% for equipment in equipments %}
+                                <li>{{ equipment }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-9 mt-4 pt-4 text-justify">
+            <p>{{ summary }}</p>
+        </div>
+    </div>
+
+    <hr width="80%">
+
+
     <div class="row">
-      <div class="btn-group" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-success"><a href="javascript:{document.getElementById('add_like').submit()}"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
-        <button type="button" class="btn btn-danger"><a href="javascript:{document.getElementById('add_dislike').submit()}"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
-      </div>
-      <div class="col-3"></div>
-      <div class="col-1">
+        <div class="col-6">
+            {% if ingredients %}
+                <h2>Ingredients:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ul>
+                            {% for ingredient in ingredients %}
+                                <li>{{ ingredient }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
 
-      </div>
-      <div class="col-1">
-
-      </div>
+        <div class="col-6">
+            {% if steps %}
+                <h2>Steps:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ol>
+                            {% for step in steps %}
+                                <li>{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
-    <br>
+
+    <hr width="80%">
+
+
+
+
+
+
+
     <div class="row">
-      {% for tag in tags %}
-      <span class="badge rounded-pill bg-warning">{{ tag }}</span>
-      {% endfor %}
+        <div class="col-sm-12 col-md-6 col-lg-3">
+            <iframe border=0 frameborder=0 height=250 width=400
+                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <iframe border=0 frameborder=0 height=250 width=400
+                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+        </div>
+        <div class="col-sm-12 col-md-6 col-lg-4">
+            <iframe border=0 frameborder=0 height=250 width=400
+                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
+        </div>
     </div>
-    <br>
+
+
+    <h2>Comments</h2>
+    <div class="row comment">
+        <div class="col-lg-2">
+            <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="height: 105px;"/>
+        </div>
+        <div class="col-lg-10">
+            <p>
+                <strong>You</strong>
+            </p>
+            <form id="add_comment" method="POST" action="{% url 'add_comment' recipe.id %}">
+                {% csrf_token%}
+                <textarea name="comment" placeholder="add your comment here" rows="2" style="width: -webkit-fill-available;"></textarea> <br>
+                <input type="submit" class="btn btn-success" value="add" name="add" style="float: right;">
+            </form>
+        </div>
+    </div>
+    {% for comment in recipe_comments %}
+        <div class="row comment">
+            <div class="col-lg-2">
+                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="height: 105px;"/>
+            </div>
+            <div class="col-lg-10">
+                <p>
+                    <strong>{{ comment.user_id }}</strong>
+                    <span class="text-secondary" style="float: right;">{{ comment.pretty_date }}</span>
+                </p>
+                <p class="comment_text">{{ comment.comment }}</p>
+            </div>
+        </div>
+    {% endfor %}
+
+
+
+    <br><br><br>
+    <h2>Recommended recipes:</h2>
     <div class="row">
-      <div class="btn-group" role="group" aria-label="Basic example">
-        <p>On twitter</p>
-        <button type="button" class="btn btn-success"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_pct }}</span></button>
-        <button type="button" class="btn btn-danger"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ hates_pct }}</span></button>
-      </div>
+        {% for recommended_recipe in recommended_recipes %}
+            <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
+                <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
+                <div class="card-body pb0">
+                    <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
+                    <hr width="90%">
+                    <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
+                </div>
+                <div class="card-footer border-warning bt0">
+                    <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
+                    <span> {{ recommended_recipe.price_per_serving }}$</span>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-  </div>
-</div>
-
-
-<div class="row pt-2">
-  <div class="col-3">
-    {% if equipments %}
-    <h2>Equipments:</h2>
-    <div class="row">
-      <div class="col-12">
-        <ul>
-          {% for equipment in equipments %}
-          <li>{{ equipment }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-  <div class="col-9 mt-4 pt-4 text-justify">
-    <p>{{ summary }}</p>
-  </div>
-</div>
-
-
-<hr width="80%">
-
-<div class="row">
-  <div class="col-6">
-    {% if ingredients %}
-    <h2>Ingredients:</h2>
-    <div class="row">
-      <div class="col-12">
-        <ul>
-          {% for ingredient in ingredients %}
-          <li>{{ ingredient }}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-
-  <div class="col-6">
-    {% if steps %}
-    <h2>Steps:</h2>
-    <div class="row">
-      <div class="col-12">
-        <ol>
-          {% for step in steps %}
-          <li>{{ step }}</li>
-          {% endfor %}
-        </ol>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-</div>
-
-
-<hr width="80%">
-
-<div class="row">
-  <div class="col-sm-12 col-md-6 col-lg-3">
-    <iframe border=0 frameborder=0 height=250 width=400
-            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-  </div>
-  <div class="col-sm-12 col-md-6 col-lg-4">
-    <iframe border=0 frameborder=0 height=250 width=400
-            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-  </div>
-  <div class="col-sm-12 col-md-6 col-lg-4">
-    <iframe border=0 frameborder=0 height=250 width=400
-            src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-  </div>
-</div>
 
 
 
-<h2>Recommended recipes:</h2>
-<div class="row">
-  {% for recommended_recipe in recommended_recipes %}
-  <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
-    <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
-    <div class="card-body pb0">
-      <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
-      <hr width="90%">
-      <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
-    </div>
-    <div class="card-footer border-warning bt0">
-      <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
-      <span> {{ recommended_recipe.price_per_serving }}$</span>
-    </div>
-  </div>
-  {% endfor %}
-</div>
+    <form id="add_like" method="POST" action="{% url 'add_like' recipe.id %}">
+        {% csrf_token%}
+        <input type="hidden">
+    </form>
 
+    <form id="add_dislike" method="POST" action="{% url 'add_dislike' recipe.id %}">
+        {% csrf_token%}
+        <input type="hidden">
+    </form>
 
-
-<form id="add_like" method="POST" action="{% url 'add_like' recipe.id %}">
-  {% csrf_token%}
-  <input type="hidden">
-</form>
-
-<form id="add_dislike" method="POST" action="{% url 'add_dislike' recipe.id %}">
-  {% csrf_token%}
-  <input type="hidden">
-</form>
 
 {% endblock %}

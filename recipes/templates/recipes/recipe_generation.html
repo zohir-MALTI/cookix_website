@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <br><br><br>
+
+
+
+
+    <div class="row">
+        <div class="col-lg-3">
+            <h3 align="center">Ingredients keywords</h3>
+            {% for keyword in recipe_ingredients_keywords %}
+                <span class="badge badge-primary bg-warning">#{{  keyword }}</span>
+            {% endfor %}
+        </div>
+        <div class="col-lg-9">
+            <h3 align="center">Generated recipe</h3>
+            <p>{{ generated_recipe }}</p>
+        </div>
+
+    </div>
+
+
+{% endblock %}

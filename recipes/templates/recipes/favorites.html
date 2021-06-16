@@ -14,8 +14,8 @@
       <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
     </div>
     <div class="card-footer border-warning bt0">
-      <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min / </span>
-      <span> {{ recipe.price_per_serving }}$</span>
+      <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+      <span style="float: right"> {{ recipe.price_per_serving }}$</span>
     </div>
   </div>
   {% endfor %}

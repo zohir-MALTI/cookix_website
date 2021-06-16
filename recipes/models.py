@@ -55,3 +55,16 @@ class Dislikes(models.Model):
     user_id   = models.ForeignKey(User, on_delete=models.CASCADE)
     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     dislike_date = models.DateTimeField(auto_now_add=True)
+
+
+class Comments(models.Model):
+    user_id   = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    comment_date = models.DateTimeField(auto_now_add=True)
+    comment  = models.TextField()
+
+    def pretty_date(self):
+        return self.comment_date.strftime("%Y-%m-%d %H:%M")
+
+
+

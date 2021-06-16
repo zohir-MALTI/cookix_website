@@ -1,38 +1,47 @@
-
-label:before {
-  content: url("https://cdn1.iconfinder.com/data/icons/windows8_icons_iconpharm/26/unchecked_checkbox.png");
-  position: absolute;
-  z-index: 100;
-}
-:checked+label:before {
-  content: url("https://cdn1.iconfinder.com/data/icons/windows8_icons_iconpharm/26/checked_checkbox.png");
-}
-input[type=checkbox] {
-  display: none;
-}
-/*pure cosmetics:*/
-img .diets {
-  width: 150px;
-  height: 150px;
-  background-color: red;
-  color: red;
-}
-label {
-  margin: 10px;
-  width: 150px;
-  height: 150px;
-  background-color: red;
-}
-
-my_fform {
-  margin: 10px;
-  width: 150px;
-  height: 150px;
-  background-color: red;
-}
+/*.table thead th {*/
+/*  background-color: #5b80b2;*/
+/*}*/
 
 
-.myf1 {
-  color: red;
-  background-color: black;
-}
+
+/*.btn a {*/
+/*  color: white;*/
+/*}*/
+
+/*label:before {*/
+/*  content: url("https://cdn1.iconfinder.com/data/icons/windows8_icons_iconpharm/26/unchecked_checkbox.png");*/
+/*  position: absolute;*/
+/*  z-index: 100;*/
+/*}*/
+/*:checked+label:before {*/
+/*  content: url("https://cdn1.iconfinder.com/data/icons/windows8_icons_iconpharm/26/checked_checkbox.png");*/
+/*}*/
+/*input[type=checkbox] {*/
+/*  display: none;*/
+/*}*/
+/*!*pure cosmetics:*!*/
+/*img .diets {*/
+/*  width: 150px;*/
+/*  height: 150px;*/
+/*  background-color: red;*/
+/*  color: red;*/
+/*}*/
+/*label {*/
+/*  margin: 10px;*/
+/*  width: 150px;*/
+/*  height: 150px;*/
+/*  background-color: red;*/
+/*}*/
+
+/*my_fform {*/
+/*  margin: 10px;*/
+/*  width: 150px;*/
+/*  height: 150px;*/
+/*  background-color: red;*/
+/*}*/
+
+
+/*.myf1 {*/
+/*  color: red;*/
+/*  background-color: black;*/
+/*}*/

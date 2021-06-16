@@ -1,10 +1,11 @@
+import random
 import time
 import numpy as np
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-
-from . import TwitterStats
+from django.contrib.postgres.search import *
+from . import TwitterStats, generate_sentences, generator_model, get_sentences_beginning, INGREDIENTS_KEYWORDS
 from .models import *
 from django.db.models import Q
 import spacy
@@ -19,6 +20,7 @@ from sklearn.cluster import KMeans
 # from cookix_website import twitter_stats
 
 
+
 CLASSIFIER_NAME = "recommendation_classifier.pickle"
 RECIPES_INGREDIENTS_DF = "recipes_by_ing_df.csv"
 TOKEN_IN_TITLE_FACTOR = 10
@@ -28,12 +30,56 @@ def home(request):
     recipes_min = recipes[:100]
     # print(len(recipes))
     user_id = request.user.id
-    if user_id is not None:
+    if user_id is not None and len(Likes.objects.all().filter(user_id=user_id)) > 0:
         clusters = custom_recipes_clusters(user_id)
+    else:
+        clusters = None
     return render(request, 'recipes/home.html', {'recipes': recipes_min,
                                                  'recipes_count': Recipe.objects.count(),
                                                  'todays_special': recipes_min[0],
                                                  'clusters': clusters})
+
+def about_us(request):
+    return render(request, 'recipes/about_us.html')
+
+
+def todays_special_recipe(user_id):
+
+    if not os.path.isfile(CLASSIFIER_NAME):
+        print('Creating CLASSIFIER!')
+        train_model()
+
+    recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
+    file = open(CLASSIFIER_NAME, 'rb')
+    nearest_neighbors_algo = pickle.load(file)
+    file.close()
+
+    pks = Likes.objects.all().filter(user_id=user_id)
+    liked_recipes_idx = list([recipe.recipe_id.id for recipe in pks])
+    random_idx = random.choice(liked_recipes_idx)
+
+    recipe_array = recipes_ing_df.loc[int(random_idx), :].to_numpy().reshape(1, -1)
+    distances, nearest_idx = nearest_neighbors_algo.kneighbors(recipe_array, n_neighbors=10)
+    real_idx_recipes = [recipes_ing_df.index[idx] for idx in nearest_idx[0]]
+
+    # get for each similar recipe, its array
+    similar_recipes = []
+    for recipe_id in real_idx_recipes:
+        recipe = list(recipes_ing_df.loc[int(recipe_id), :])
+        recipe = [1 if x == TOKEN_IN_TITLE_FACTOR else x for x in recipe]
+        similar_recipes.append(recipe)
+
+    similar_recipes_arr = np.array(similar_recipes)
+    n_clusters = 6
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(similar_recipes_arr)
+    #labels = zip(similar_recipes_idx, kmeans.labels_)
+    labels = kmeans.labels_
+    recipes_per_cluster = {}
+    for cluster in range(n_clusters):
+        cluster_idx = [idx for i, idx in enumerate(real_idx_recipes) if labels[i] == cluster]
+        recipes_per_cluster[cluster+1] = Recipe.objects.filter(pk__in=cluster_idx)
+
+    return recipes_per_cluster
 
 
 def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
@@ -79,9 +125,70 @@ def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
         cluster_idx = [idx for i, idx in enumerate(similar_recipes_idx) if labels[i] == cluster]
         recipes_per_cluster[cluster+1] = Recipe.objects.filter(pk__in=cluster_idx)
 
-
     return recipes_per_cluster
 
+
+def diet_types(request, diet_type):
+    if request.method == 'GET':
+        page_number = request.GET.get("page")
+        diet_type = diet_type.replace("-", " ")
+        recipes = Recipe.objects.all().defer("ingredients", "summary")
+        # switch case in python
+        if diet_type == "vegetarian":
+            recipes = recipes.filter(vegetarian="True")
+        elif diet_type == "vegan":
+            recipes = recipes.filter(vegan="True")
+        elif diet_type == "vegan":
+            recipes = recipes.filter(vegan="True")
+        elif diet_type == "vegan":
+            recipes = recipes.filter(vegan="True")
+        elif diet_type == "vegan":
+            recipes = recipes.filter(vegan="True")
+
+        paginator = Paginator(recipes, 24)
+        try:
+            recipes_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            recipes_obj = paginator.get_page(1)
+        except EmptyPage:
+            recipes_obj = paginator.get_page(1)
+
+        return render(request, 'recipes/search.html', {'recipes': recipes_obj, 'result_count': len(recipes),
+                                                       'query': diet_type})
+
+
+def dish_types(request, dish_type):
+    if request.method == 'GET':
+        page_number = request.GET.get("page")
+        dish_type = dish_type.replace("-", " ")
+        recipes = Recipe.objects.all().defer("ingredients", "summary").filter(dish_types__icontains=dish_type)
+        paginator = Paginator(recipes, 24)
+        try:
+            recipes_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            recipes_obj = paginator.get_page(1)
+        except EmptyPage:
+            recipes_obj = paginator.get_page(1)
+
+        return render(request, 'recipes/search.html', {'recipes': recipes_obj, 'result_count': len(recipes),
+                                                       'query': dish_type})
+
+
+def cuisine_types(request, cuisine_type):
+    if request.method == 'GET':
+        page_number = request.GET.get("page")
+        cuisine_type = cuisine_type.replace("-", " ")
+        recipes = Recipe.objects.all().defer("ingredients", "summary").filter(cuisines__icontains=cuisine_type)
+        paginator = Paginator(recipes, 24)
+        try:
+            recipes_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            recipes_obj = paginator.get_page(1)
+        except EmptyPage:
+            recipes_obj = paginator.get_page(1)
+
+        return render(request, 'recipes/search.html', {'recipes': recipes_obj, 'result_count': len(recipes),
+                                                       'query': cuisine_type})
 
 
 @login_required(login_url="/accounts/login")
@@ -117,15 +224,31 @@ def add_dislike(request, recipe_id):
         return redirect('/' + str(recipe_id))
 
 
+@login_required(login_url="/accounts/login")
+def add_comment(request, recipe_id):
+    if request.method == 'POST':
+        recipe_comments = Comments.objects
+        #add_action(request, recipe_comments, recipe_id)
+        recipe_comments.create(user_id=request.user,
+                               recipe_id=get_object_or_404(Recipe, pk=recipe_id),
+                               comment=request.POST["comment"])
+
+        return redirect('/' + str(recipe_id))
+
+
 def search(request):
     if request.method == 'GET':
         keys = request.GET.get("search")
+        print(keys)
         page_number = request.GET.get("page")
-        recipes = Recipe.objects.filter(
-            Q(title__icontains=keys) #| Q(ingredients__icontains=keys)
-            #Q(equipments__icontains=keys)
-        )  # filter(search='cheese')  / filter(body_text__search='cheese')
-        paginator = Paginator(recipes, 24)
+        #recipes = Recipe.objects.filter(
+        #    Q(title__icontains=keys) #| Q(ingredients__icontains=keys)
+        #Q(equipments__icontains=keys)
+        #)  # filter(search='cheese')  / filter(body_text__search='cheese')
+        #recipes = Recipe.objects.annotate(search=SearchVector('ingredients')).filter(search=keys)
+        recipes = Recipe.objects.annotate(search=SearchVector('ingredients')).filter(search=SearchQuery(keys))
+        #recipes = Recipe.objects.annotate(rank=SearchRank(SearchVector('ingredients'), SearchQuery(keys))).order_by('-rank')
+        paginator = Paginator(recipes, 36)
         try:
             recipes_obj = paginator.get_page(page_number)
         except PageNotAnInteger:
@@ -177,6 +300,7 @@ def detail(request, recipe_id):
 
     recipe_likes_count = Likes.objects.filter(recipe_id=recipe_id).count()
     recipe_dislikes_count = Dislikes.objects.filter(recipe_id=recipe_id).count()
+    recipe_comments = Comments.objects.filter(recipe_id=recipe_id)
     # print("cooo: ", recipe_likes_count)
 
     # recommended recipes
@@ -185,7 +309,8 @@ def detail(request, recipe_id):
 
     # get Twitter statistics
     # tw = TwitterStats().get_tweets(["couscous", "salmon", "Shrimp"])
-    likes_pct, hates_pct = TwitterStats().analyze("couscous OR salmon OR Shrimp")
+    # likes_pct, hates_pct = TwitterStats().analyze("couscous OR salmon OR Shrimp")
+    likes_pct, hates_pct = 74, 40
 
 
     return render(request, 'recipes/detail.html',
@@ -194,7 +319,37 @@ def detail(request, recipe_id):
                    'likes_count': recipe_likes_count,
                    'dislikes_count': recipe_dislikes_count,
                    'recommended_recipes': rec_recipes,
-                   'likes_pct': likes_pct, 'hates_pct': hates_pct})
+                   'likes_pct': likes_pct, 'hates_pct': hates_pct,
+                   'recipe_comments': recipe_comments})
+
+
+def recipe_generation_settings(request):
+
+    return render(request, 'recipes/recipe_generation_settings.html', {"steps_beginnings_sentences": get_sentences_beginning()})
+
+
+def recipe_generation(request):
+    if request.method == 'POST':
+
+
+        beginning_sentence = request.POST.get("beginning_sentence")
+        steps_beginnings_sentences_dict = get_sentences_beginning()
+        beginning_sentence = steps_beginnings_sentences_dict[beginning_sentence]
+        sentences_count = request.POST.get("sentences_count")
+        print(beginning_sentence)
+        print(sentences_count)
+        print()
+        generated_recipe = generate_sentences(generator_model, beginning_sentence, int(sentences_count))
+        print(type(INGREDIENTS_KEYWORDS))
+        print(type(list(INGREDIENTS_KEYWORDS)))
+        recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in generated_recipe]
+
+        return render(request, 'recipes/recipe_generation.html',
+                      {'beginning_sentence': beginning_sentence, 'sentences_count': sentences_count,
+                       'generated_recipe': generated_recipe,
+                       'recipe_ingredients_keywords': recipe_ingredients_keywords})
+    else:
+        return render(request, 'recipes/recipe_generation_settings.html')
 
 
 # give a highest factor (factor of 10 instead of 1) to the ingredients included in the title

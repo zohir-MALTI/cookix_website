@@ -3,22 +3,31 @@
 {% block content %}
 
 
-    <h1>SIGN UP</h1>
+
+    <div class="signup-form">
+    <h1>Sing up</h1>
     <form method="POST"  action="{% url 'signup' %}">
         {% csrf_token %}
-        Nom d'utilisateur: <br>
+        Username: <br>
         <input type="text" name="username" /> <br>
-    Mot de passe: <br>
+        Email: <br>
+        <input type="email" name="email" /> <br>
+        Lastname: <br>
+        <input type="text" name="lastname" /> <br>
+        Firstname: <br>
+        <input type="text" name="firstname" /> <br>
+        Password: <br>
         <input type="password" name="password1" /> <br>
-        Confirmer mot de passe: <br>
+        Confirm your password: <br>
         <input type="password" name="password2" />
         <br><br>
-        <input type="submit" class="btn btn-primary" value="S'inscrire !" name="submit">
+        <input type="submit" class="btn btn-primary" value="Create account !" name="submit">
     </form>
     {% if error %}
-            <p style="color: red">{{ error }}</p>
-            <br>
+        <p style="color: red">{{ error }}</p>
+        <br>
     {% endif %}
+    </div>
 
 {% endblock %}
 
