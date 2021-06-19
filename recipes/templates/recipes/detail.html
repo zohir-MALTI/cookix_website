@@ -27,7 +27,7 @@
                 <tbody>
                 <tr>
                     <td><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min</td>
-                    <td><span class="oi oi-dollar"></span> {{ recipe.price_per_serving }}</td>
+                    <td><span class="oi oi-dollar"></span> {{ recipe.price_per_serving|floatformat:"1" }}</td>
                     <td><span class="oi oi-heart"> {{ recipe.health_score }}%</td>
                     <td><span class="oi oi-badge"> {{ recipe.spoonacular_score }}% </td>
                 </tr>
@@ -36,16 +36,10 @@
 
             <div class="row">
                 <div class="btn-group" role="group" aria-label="Basic example" style="width: 100%">
-                    <button type="button" class="btn btn-success" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
-                    <button type="button" class="btn btn-danger" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
+                    <button type="button" class="btn btn-success {% if recipe_liked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
+                    <button type="button" class="btn btn-danger {% if recipe_disliked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
                 </div>
-                <div class="col-3"></div>
-                <div class="col-1">
 
-                </div>
-                <div class="col-1">
-
-                </div>
             </div>
             <div class="row badges" style="justify-content: center">
                 {% for tag in tags %}
@@ -56,16 +50,37 @@
             <table class="table" style="text-align: center">
                 <thead>
                 <tr>
-                    <th>Twitter reviews about this recipe</th>
+                    <th>Comments analysis regarding this recipe</th>
+                    <th>Twitter reviews regarding this recipe</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>
-                        <div class="progress-bar {% if likes_pct < 30 %} bg-danger {% elif likes_pct < 70 %} bg-warning {% else %} bg-success {% endif %}" role="progressbar" aria-valuenow="{{ likes_pct }}"
-                             aria-valuemin="0" aria-valuemax="100" style="width:{{ likes_pct }}%">
-                            {{ likes_pct }}%
-                        </div>
+                        {% if pos_comments_count > 0 or neg_comments_count > 0 %}
+                            <div class="progress" style="height: 30px">
+                                <div class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ pos_comments_pct }}"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:{{ pos_comments_pct }}%">
+                                    {{ pos_comments_pct }}% ({{ pos_comments_count }})
+                                </div>
+                                <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="{{ neg_comments_pct }}"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:{{ neg_comments_pct }}%">
+                                    {{ neg_comments_pct }}% ({{ neg_comments_count }})
+                                </div>
+                            </div>
+                        {% else %}
+                            <p align="center">No comments yet !</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if positive_tweets_count > 0 %}
+                            <div class="progress-bar {% if positive_tweets_pct < 30 %} bg-danger {% elif positive_tweets_pct < 70 %} bg-warning {% else %} bg-success {% endif %}" role="progressbar" aria-valuenow="{{ positive_tweets_pct }}"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:{% if positive_tweets_pct < 20 %} 20% {% else %}{{ positive_tweets_pct }}% {% endif %}">
+                                {{ positive_tweets_pct }}% ({{ positive_tweets_count }} tweets)
+                            </div>
+                        {% else %}
+                            <p align="center">Sorry, there are no comments for this recipe !</p>
+                        {% endif %}
                     </td>
                 </tr>
                 </tbody>
@@ -91,6 +106,7 @@
             {% endif %}
         </div>
         <div class="col-9 mt-4 pt-4 text-justify">
+            <h2>Summary:</h2>
             <p>{{ summary }}</p>
         </div>
     </div>
@@ -170,7 +186,9 @@
             </form>
         </div>
     </div>
-    {% for comment in recipe_comments %}
+
+
+    {% for comment, sentiment in comments_with_sentiment %}
         <div class="row comment">
             <div class="col-lg-2">
                 <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="height: 105px;"/>
@@ -180,7 +198,11 @@
                     <strong>{{ comment.user_id }}</strong>
                     <span class="text-secondary" style="float: right;">{{ comment.pretty_date }}</span>
                 </p>
-                <p class="comment_text">{{ comment.comment }}</p>
+                <p class="comment_text">
+                    {% if sentiment == "pos" %} <span class="oi oi-check" style="color: green"></span>
+                    {% elif sentiment == "neg" %} <span class="oi oi-warning" style="color: red"></span> {% endif %}
+                    {{ comment.comment }}
+                </p>
             </div>
         </div>
     {% endfor %}
@@ -199,8 +221,8 @@
                     <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
                 </div>
                 <div class="card-footer border-warning bt0">
-                    <span><span class="oi oi-clock"></span> {{ recommended_recipe.ready_in_minutes }}min / </span>
-                    <span> {{ recommended_recipe.price_per_serving }}$</span>
+                    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+                    <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
                 </div>
             </div>
         {% endfor %}

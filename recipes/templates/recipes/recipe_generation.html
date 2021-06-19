@@ -3,24 +3,37 @@
 
 {% block content %}
 
-    <br><br><br>
 
+    <br>
+    </div>
 
+    <div class="generation-block">
+        <h2><span class="oi oi-warning"></span>Disclaimer</h2>
 
-
-    <div class="row">
-        <div class="col-lg-3">
-            <h3 align="center">Ingredients keywords</h3>
-            {% for keyword in recipe_ingredients_keywords %}
-                <span class="badge badge-primary bg-warning">#{{  keyword }}</span>
-            {% endfor %}
-        </div>
-        <div class="col-lg-9">
-            <h3 align="center">Generated recipe</h3>
-            <p>{{ generated_recipe }}</p>
-        </div>
+        - This is a BETA version of recipes generation, it is under study.<br>
+        - The generated recipe may contain few misspelled words, this is related to the input data quality.<br>
+        - Please feel free to regenerate a recipe as many times as you want.
 
     </div>
+
+    <div class="container">
+
+        <br><br>
+
+
+        <div class="row">
+            <div class="col-lg-3">
+                <h3 align="center">Ingredients keywords</h3><br>
+                {% for keyword in recipe_ingredients_keywords %}
+                    <span class="badge  badge-pill bg-warning" style="font-size: 15px;margin-bottom: 10px;">#{{  keyword }}</span>
+                {% endfor %}
+            </div>
+            <div class="col-lg-9">
+                <h3 align="center">Generated recipe</h3><br>
+                <p>{{ generated_recipe }}</p>
+            </div>
+
+        </div>
 
 
 {% endblock %}

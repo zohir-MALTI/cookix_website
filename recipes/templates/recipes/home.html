@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 
     <br>
+
+
     <h1 align="center">Let's find out the best recipes among our <b style="color: #ffbf29">{{ recipes_count }}</b> recipes ...</h1><br>
 
     <form method="GET" action="{% url 'search' %}">
@@ -30,31 +32,57 @@
     </div>
 
 
-    <br>
+    <br><br>
 
-    {% if clusters is not None %}
-    <h1>Our selections for you:</h1>
-    {% endif %}
-    <br>
-    {% for cluster_num, suggested_recipes in clusters.items %}
-        <div class="row">
-            <div class="col-lg-2" style="align-self: center; color: #ffbf29; text-align: center">
-                <h2>Selection <br> {{ cluster_num }}</h2>
-            </div>
-            <div class="col-lg-10">
-                <div class="scrollhor">
-                    {% for recipe in suggested_recipes %}
-                        <div class="card  home-card border-warning col-sm-4 col-md-3 col-lg-2">
-                            <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-                            <div class="card-body pb0 ">
-                                <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
-                            </div>
-                        </div>
-                    {% endfor %}
+    <div
+            class="p-5 text-center bg-image"
+            style="
+                    {#background-image: url('https://mdbcdn.b-cdn.net/img/new/slides/041.jpg');#}
+                    background-image: url({% static 'homapage_image2.jpg'  %});
+                    height: 400px;
+                    background-repeat: no-repeat;
+                    {#background-size: auto;#}
+                    background-size: 100% 100%;
+                    "
+    >
+        <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);padding: 20px;">
+            <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="text-white">
+                    <h2 class="mb-3">Create and try your own recipe with our generation model</h2>
+                    <a class="btn btn-outline-warning btn-lg" href="{% url 'recipe_generation_settings' %}" role="button">Try !</a>
                 </div>
             </div>
         </div>
-    {% endfor %}
+    </div>
+
+
+    <br>
+
+    {% if clusters is not None %}
+        <h1 style="background-color: #ffbf29;color: white;text-align: center;">Our selections for you:</h1>
+    {% endif %}
+    <br>
+    <div class="row" style="justify-content: center;text-align: center">
+        {% for cluster_num, suggested_recipes in clusters.items %}
+
+            <div class="col-sm-12 col-md-12 col-lg-6">
+                <div style="align-self: center; color: #ffbf29; text-align: center">
+                    <h2>{{ cluster_num }}</h2>
+                </div>
+                    <div class="scrollhor">
+                        {% for recipe in suggested_recipes %}
+                            <div class="card  home-card border-warning col-sm-4 col-md-4 col-lg-4 col-lg-4">
+                                <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+                                <div class="card-body pb0 ">
+                                    <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+            </div>
+        {% endfor %}
+    </div>
 
     <br><br>
 
@@ -72,7 +100,7 @@
                 </div>
                 <div class="card-footer border-warning bt0">
                     <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
-                    <span style="float: right"> {{ recipe.price_per_serving }}$</span>
+                    <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
                 </div>
             </div>
         {% endfor %}

@@ -5,7 +5,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import *
-from . import TwitterStats, generate_sentences, generator_model, get_sentences_beginning, INGREDIENTS_KEYWORDS
+from . import generate_sentences, generator_model, get_sentences_beginning, INGREDIENTS_KEYWORDS
+from . import get_users_feedbacks
 from .models import *
 from django.db.models import Q
 import spacy
@@ -17,12 +18,13 @@ import os
 from sklearn.neighbors import NearestNeighbors
 import pickle
 from sklearn.cluster import KMeans
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # from cookix_website import twitter_stats
+from . import UTILS_FOLDER_PATH
 
 
-
-CLASSIFIER_NAME = "recommendation_classifier.pickle"
-RECIPES_INGREDIENTS_DF = "recipes_by_ing_df.csv"
+CLASSIFIER_NAME = UTILS_FOLDER_PATH+"recommendation_classifier.pickle"
+RECIPES_INGREDIENTS_DF = UTILS_FOLDER_PATH+"recipes_by_ing_df.csv"
 TOKEN_IN_TITLE_FACTOR = 10
 
 def home(request):
@@ -123,7 +125,18 @@ def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
     recipes_per_cluster = {}
     for cluster in range(n_clusters):
         cluster_idx = [idx for i, idx in enumerate(similar_recipes_idx) if labels[i] == cluster]
-        recipes_per_cluster[cluster+1] = Recipe.objects.filter(pk__in=cluster_idx)
+        # print(cluster_idx)
+        # print(Recipe.objects.filter(pk__in=cluster_idx))
+        recipes_cluster_keywords = [recipe.title.strip().split(" ") for recipe in Recipe.objects.filter(pk__in=cluster_idx)]
+        # print(recipes_cluster_titles)
+        # recipes_cluster_keywords = " ".join(recipes_cluster_titles)
+        recipes_cluster_keywords = list(itertools.chain(*recipes_cluster_keywords))
+        # recipes_cluster_keywords = [title.split("") for title in Recipe.objects.filter(pk__in=cluster_idx)]
+        # print(recipes_cluster_keywords)
+        cluster_name = Counter(recipes_cluster_keywords).most_common(1)[0][0]
+        # print(cluster_name)
+        # print(cluster_name[0])
+        recipes_per_cluster["#"+cluster_name] = Recipe.objects.filter(pk__in=cluster_idx)
 
     return recipes_per_cluster
 
@@ -301,26 +314,65 @@ def detail(request, recipe_id):
     recipe_likes_count = Likes.objects.filter(recipe_id=recipe_id).count()
     recipe_dislikes_count = Dislikes.objects.filter(recipe_id=recipe_id).count()
     recipe_comments = Comments.objects.filter(recipe_id=recipe_id)
-    # print("cooo: ", recipe_likes_count)
+
+    # check weather this user has liked/disliked this recipe
+    recipe_liked_by_user, recipe_disliked_by_user = False, False
+    if Likes.objects.filter(user_id=request.user.id, recipe_id=recipe_id).exists():
+        recipe_liked_by_user = True
+    elif Dislikes.objects.filter(user_id=request.user.id, recipe_id=recipe_id).exists():
+        recipe_disliked_by_user = True
+
+
+# comments analysis
+    comments_with_sentiment = []
+    if len(recipe_comments) > 0:
+        sentiment_analyser = SentimentIntensityAnalyzer()
+        pos_comments_count = 0
+        neg_comments_count = 0
+        sentiment_pct = 0.2
+
+        # recipe_comments_text = [comment.comment for comment in recipe_comments]
+        for comment_obj in recipe_comments:
+            result = sentiment_analyser.polarity_scores(comment_obj.comment)  # returns ex: {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
+            if result['pos'] > sentiment_pct:
+                pos_comments_count += 1
+                comments_with_sentiment.append((comment_obj, "pos"))
+            elif result['neg'] > sentiment_pct:
+                neg_comments_count += 1
+                comments_with_sentiment.append((comment_obj, "neg"))
+            else:
+                comments_with_sentiment.append((comment_obj, ""))
+
+        count = pos_comments_count + neg_comments_count
+
+        if count > 0:
+            pos_comments_pct = int((pos_comments_count / count) * 100)
+            neg_comments_pct = 100 - pos_comments_pct
+        else:
+            pos_comments_pct, neg_comments_pct = 0, 0
+    else:
+        pos_comments_count = 0
+        neg_comments_count = 0
+        pos_comments_pct, neg_comments_pct = 0, 0
 
     # recommended recipes
     rec_recipes = content_based_rec(recipe_id)
     rec_recipes = Recipe.objects.filter(pk__in=rec_recipes)
-
     # get Twitter statistics
-    # tw = TwitterStats().get_tweets(["couscous", "salmon", "Shrimp"])
-    # likes_pct, hates_pct = TwitterStats().analyze("couscous OR salmon OR Shrimp")
-    likes_pct, hates_pct = 74, 40
-
+    recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in recipe.title.lower()][:3]
+    positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=recipe_ingredients_keywords, #["roast", "lemon", "olive oil"],
+                                                                     num_items=1)
 
     return render(request, 'recipes/detail.html',
                   {'recipe': recipe, 'steps': steps, 'equipments': equipments, 'summary': summary,
                    'ingredients': ingredients, 'dish_types': dish_types, 'tags': tags,
-                   'likes_count': recipe_likes_count,
-                   'dislikes_count': recipe_dislikes_count,
+                   'likes_count': recipe_likes_count, 'dislikes_count': recipe_dislikes_count,
+                   'recipe_liked_by_user': recipe_liked_by_user, 'recipe_disliked_by_user': recipe_disliked_by_user,
                    'recommended_recipes': rec_recipes,
-                   'likes_pct': likes_pct, 'hates_pct': hates_pct,
-                   'recipe_comments': recipe_comments})
+                   'positive_tweets_pct': positive_tweets_pct, 'positive_tweets_count':positive_tweets_count,
+                   'pos_comments_pct': pos_comments_pct, 'neg_comments_pct': neg_comments_pct,
+                   'pos_comments_count': pos_comments_count, 'neg_comments_count': neg_comments_count,
+                   'comments_with_sentiment': comments_with_sentiment})
 
 
 def recipe_generation_settings(request):
@@ -331,17 +383,15 @@ def recipe_generation_settings(request):
 def recipe_generation(request):
     if request.method == 'POST':
 
-
         beginning_sentence = request.POST.get("beginning_sentence")
         steps_beginnings_sentences_dict = get_sentences_beginning()
-        beginning_sentence = steps_beginnings_sentences_dict[beginning_sentence]
+        if beginning_sentence == "random":
+            random_sentence = random.choice(list(steps_beginnings_sentences_dict.keys()))
+            beginning_sentence = steps_beginnings_sentences_dict[random_sentence]
+        else:
+            beginning_sentence = steps_beginnings_sentences_dict[beginning_sentence]
         sentences_count = request.POST.get("sentences_count")
-        print(beginning_sentence)
-        print(sentences_count)
-        print()
         generated_recipe = generate_sentences(generator_model, beginning_sentence, int(sentences_count))
-        print(type(INGREDIENTS_KEYWORDS))
-        print(type(list(INGREDIENTS_KEYWORDS)))
         recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in generated_recipe]
 
         return render(request, 'recipes/recipe_generation.html',
