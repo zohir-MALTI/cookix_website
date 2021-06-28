@@ -2,22 +2,56 @@
 {% load static %}
 {% block content %}
 
-    <br>
+    <br><br><br><br>
+    </div> {# end of container #}
+    <div id="home-carousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+        <div class="carousel-inner">
+            <div class="carousel-item">
+                <div
+                        class="p-5 text-center bg-image"
+                        style="background-image: url({% static 'homapage_image.jpg'  %});
+                                background-repeat: no-repeat;
+                                background-size: 100%;">
+                    <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);padding: 30px;width: 40%;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-white">
+                                <h4 class="mb-3">Create and try your own recipe with our generation model</h4>
+                                <a class="btn btn-outline-warning btn-lg" href="{% url 'recipe_generation_settings' %}" role="button">Try !</a>
+                                <br><br>
+                                <h4>OR</h4>
+                                <h4>find out the best recipes among our {{ recipes_count }} recipes ...</h4>
+                                <form method="GET" action="{% url 'search' %}">
+                                    <div class="input-group search-from">
+                                        {% csrf_token %}
+                                        <input type="search" name="search" class="form-control rounded" placeholder="Search here ..." aria-label="Search"
+                                               aria-describedby="search-addon" />
+                                        <button type="submit" class="btn btn-outline-warning"><span class="oi oi-magnifying-glass"></span> Search</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item active">
+                <div class="todays-special " style="">
+                    <div class="text-on-todays-special">
+                        <h3 style="color: #ffbf29;">Today's special</h3>
+                        <div class="todays-special-summary">
+                            <h5>{{ todays_special.title }}</h5>
+                            <p>{{ todays_special.summary_of_summary }}</p>
 
-
-    <h1 align="center">Let's find out the best recipes among our <b style="color: #ffbf29">{{ recipes_count }}</b> recipes ...</h1><br>
-
-    <form method="GET" action="{% url 'search' %}">
-        <div class="input-group search-from">
-            {% csrf_token %}
-            <input type="search" name="search" class="form-control rounded" placeholder="Search" aria-label="Search"
-                   aria-describedby="search-addon" />
-            <button type="submit" class="btn btn-outline-warning"><span class="oi oi-magnifying-glass"></span> Search</button>
+                            <a onclick="window.location='{% url 'detail' todays_special.id %}';" style="cursor: pointer;color: #ffbf29;" class="mt1"><b>READ MORE <span class="oi oi-chevron-right"></span></b></a>
+                        </div>
+                    </div>
+                    <img src="{{ todays_special.image }}" width="100%" style="height: 438px">
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 
-    <br>
 
+    <!-- Comments go here
     <div class="todays-special " style="">
         <div class="text-on-todays-special">
             <h3 style="color: #ffbf29;">Today's special</h3>
@@ -32,79 +66,89 @@
     </div>
 
 
-    <br><br>
+    <br>
 
     <div
             class="p-5 text-center bg-image"
-            style="
-                    {#background-image: url('https://mdbcdn.b-cdn.net/img/new/slides/041.jpg');#}
-                    background-image: url({% static 'homapage_image2.jpg'  %});
-                    height: 400px;
+            style="background-image: url({% static 'homapage_image.jpg'  %});
                     background-repeat: no-repeat;
-                    {#background-size: auto;#}
-                    background-size: 100% 100%;
-                    "
-    >
-        <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);padding: 20px;">
+                    background-size: 100%;">
+        <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);padding: 30px;width: 40%;">
             <div class="d-flex justify-content-center align-items-center h-100">
                 <div class="text-white">
-                    <h2 class="mb-3">Create and try your own recipe with our generation model</h2>
+                    <h4 class="mb-3">Create and try your own recipe with our generation model</h4>
                     <a class="btn btn-outline-warning btn-lg" href="{% url 'recipe_generation_settings' %}" role="button">Try !</a>
+                    <br><br>
+                    <h4>OR</h4>
+                    <h4>find out the best recipes among our {{ recipes_count }} recipes ...</h4>
+                    <form method="GET" action="{% url 'search' %}">
+                        <div class="input-group search-from">
+                            {% csrf_token %}
+                            <input type="search" name="search" class="form-control rounded" placeholder="Search here ..." aria-label="Search"
+                                   aria-describedby="search-addon" />
+                            <button type="submit" class="btn btn-outline-warning"><span class="oi oi-magnifying-glass"></span> Search</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-
-
+-->
     <br>
-
     {% if clusters is not None %}
         <h1 style="background-color: #ffbf29;color: white;text-align: center;">Our selections for you:</h1>
     {% endif %}
-    <br>
-    <div class="row" style="justify-content: center;text-align: center">
-        {% for cluster_num, suggested_recipes in clusters.items %}
+    <div class="container">
 
-            <div class="col-sm-12 col-md-12 col-lg-6">
-                <div style="align-self: center; color: #ffbf29; text-align: center">
-                    <h2>{{ cluster_num }}</h2>
-                </div>
+
+        <br>
+
+
+
+
+        <div class="row" style="justify-content: center;text-align: center">
+            {% for cluster_num, suggested_recipes in clusters.items %}
+
+                <div class="col-sm-12 col-md-12 col-lg-6">
+                    <div style="align-self: center; color: #ffbf29; text-align: center">
+                        <h2>{{ cluster_num }}</h2>
+                    </div>
                     <div class="scrollhor">
                         {% for recipe in suggested_recipes %}
                             <div class="card  home-card border-warning col-sm-4 col-md-4 col-lg-4 col-lg-4">
                                 <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-                                <div class="card-body pb0 ">
+                                <div class="card-body card-body-home pb0 ">
                                     <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;"><small> {{ recipe.title }}</small></h5>
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
 
-            </div>
-        {% endfor %}
-    </div>
-
-    <br><br>
-
-
-
-    <h2>Random recicpes :</h2>
-    <div class="row">
-        {% for recipe in recipes %}
-            <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
-                <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
-                <div class="card-body pb0">
-                    <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h5>
-                    <hr width="90%">
-                    <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
                 </div>
-                <div class="card-footer border-warning bt0">
-                    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
-                    <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
+            {% endfor %}
+        </div>
+
+
+
+
+
+        <h2>Random recicpes :</h2>
+        <div class="row">
+            {% for recipe in recipes %}
+                <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
+                    <img src="{{ recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">
+                    <div class="card-body pb0">
+                        <h5 class="card-title" onclick="window.location='{% url 'detail' recipe.id %}';" style="cursor: pointer;">{{ recipe.title }}</h5>
+                        <hr width="90%">
+                        <p class="card-text pt0"><small>{{ recipe.summary_of_summary }}</small></p>
+                    </div>
+                    <div class="card-footer border-warning bt0">
+                        <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+                        <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
 
 
     </div>
@@ -115,7 +159,6 @@
         <a href="{% url 'about_us' %}" class="mt1"><b>CONTACT US <span class="oi oi-chevron-right"></span></b></a>
 
     </div>
-
 
 
 {% endblock %}

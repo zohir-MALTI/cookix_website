@@ -136,7 +136,7 @@ def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
         cluster_name = Counter(recipes_cluster_keywords).most_common(1)[0][0]
         # print(cluster_name)
         # print(cluster_name[0])
-        recipes_per_cluster["#"+cluster_name] = Recipe.objects.filter(pk__in=cluster_idx)
+        recipes_per_cluster[cluster_name] = Recipe.objects.filter(pk__in=cluster_idx)
 
     return recipes_per_cluster
 
@@ -360,8 +360,8 @@ def detail(request, recipe_id):
     rec_recipes = Recipe.objects.filter(pk__in=rec_recipes)
     # get Twitter statistics
     recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in recipe.title.lower()][:3]
-    positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=recipe_ingredients_keywords, #["roast", "lemon", "olive oil"],
-                                                                     num_items=1)
+    positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=["bitcoin", "ETH", "olive"], #recipe_ingredients_keywords
+                                                                     num_items=10)
 
     return render(request, 'recipes/detail.html',
                   {'recipe': recipe, 'steps': steps, 'equipments': equipments, 'summary': summary,

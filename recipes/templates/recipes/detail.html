@@ -105,7 +105,7 @@
                 </div>
             {% endif %}
         </div>
-        <div class="col-9 mt-4 pt-4 text-justify">
+        <div class="col-9 text-justify">
             <h2>Summary:</h2>
             <p>{{ summary }}</p>
         </div>
@@ -149,25 +149,16 @@
     <hr width="80%">
 
 
-
-
-
-
-
-    <div class="row">
-        <div class="col-sm-12 col-md-6 col-lg-3">
-            <iframe border=0 frameborder=0 height=250 width=400
-                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-        </div>
-        <div class="col-sm-12 col-md-6 col-lg-4">
-            <iframe border=0 frameborder=0 height=250 width=400
-                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-        </div>
-        <div class="col-sm-12 col-md-6 col-lg-4">
-            <iframe border=0 frameborder=0 height=250 width=400
-                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>
-        </div>
-    </div>
+{#    <div class="row">#}
+{#        <div class="col-sm-12 col-md-6 col-lg-3">#}
+{#            <iframe border=0 frameborder=0 height=250 width=400#}
+{#                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>#}
+{#        </div>#}
+{#        <div class="col-sm-12 col-md-6 col-lg-4">#}
+{#            <iframe border=0 frameborder=0 height=250 width=400#}
+{#                    src="https://twitframe.com/show?url=https://twitter.com/twitter/statuses/1406324223652495361"></iframe>#}
+{#        </div>#}
+{#    </div>#}
 
 
     <h2>Comments</h2>
@@ -209,7 +200,7 @@
 
 
 
-    <br><br><br>
+    <br>
     <h2>Recommended recipes:</h2>
     <div class="row">
         {% for recommended_recipe in recommended_recipes %}

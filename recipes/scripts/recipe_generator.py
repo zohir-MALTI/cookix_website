@@ -31,6 +31,8 @@ from collections import OrderedDict
 import time
 import itertools
 from .. import UTILS_FOLDER_PATH
+#import gpt_2_simple as gpt2
+
 
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -370,6 +372,21 @@ def get_ing_keywords(output_name=UTILS_FOLDER_PATH+"ingredients_keywords.pickle"
             ings_without_duplicates = pickle.load(file)
 
     return ings_without_duplicates
+
+
+def load_GPT2():
+    # gpt2.download_gpt2(model_name="124M")
+    sess = gpt2.start_tf_sess()
+    gpt2.load_gpt2(sess, run_name=UTILS_FOLDER_PATH+'run1')
+
+    gpt2.generate(sess,
+                  length=250,
+                  temperature=0.7,
+                  prefix="LORD",
+                  nsamples=5,
+                  batch_size=5
+                  )
+
 
 print("Loading generator model ...")
 if MODEL_NAME is None:

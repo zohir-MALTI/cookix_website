@@ -172,46 +172,50 @@ def filter_recipes_topic(sentences):
 # return positive tweets percentage and count
 def get_users_feedbacks(keywords, num_items=100, sentiment_pct = 0.5):
 
-    try:
-        tweets = tw.Cursor(api.search,
-                           q=keywords,
-                           lang="en",
-                           since='2021-03-01').items(num_items)
+# try:
+    print("AAAAAAAAAAAa")
+    tweets = tw.Cursor(api.search,
+                       q=keywords,
+                       lang="en",
+                       since='2021-04-01').items(num_items)
+    # print(len(tweets))
 
-        print(tweets)
-        [print(tweet) for tweet in tweets]
-        all_tweets = [tweet.text for tweet in tweets]
+    # urls = [tweet.id for tweet in tweets]
+    # print(urls)
+    all_tweets = [tweet.text for tweet in tweets]
+    # print(dir([tweet for tweet in tweets][0]))
+    # print([tweet.id for tweet in tweets])
+    # print([tweet.id_str for tweet in tweets])
+    # print("TWWWWWWWWWWWWWWW: ", all_tweets)
+    all_tweets = clean_text(all_tweets)
+    # remove duplicated tweets
+    all_tweets = list(set(all_tweets))
+    # print("TWWWWWWWWWWWWWWW: ", all_tweets)
+    cooking_sentences = filter_recipes_topic(all_tweets)
+    # all_tweets = [tweet.text for tweet in tweets]
 
-        # print("TWWWWWWWWWWWWWWW: ", all_tweets)
-        all_tweets = clean_text(all_tweets)
-        # remove duplicated tweets
-        all_tweets = list(set(all_tweets))
-        # print("TWWWWWWWWWWWWWWW: ", all_tweets)
-        cooking_sentences = filter_recipes_topic(all_tweets)
-        # all_tweets = [tweet.text for tweet in tweets]
+    # sentences = self.get_tweets(keywords, num_items=100)
+    sentiment_analyser = SentimentIntensityAnalyzer()
+    pos_sen = 0
+    neg_sen = 0
+    for sen in cooking_sentences:
+        result = sentiment_analyser.polarity_scores(sen) # returns ex: {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
+        # print(f"{result}   ==================> {sen}")
+        if result['pos'] > sentiment_pct: pos_sen += 1
+        elif result['neg'] > sentiment_pct: neg_sen += 1
+        # print("ss: ", ss)
+        # for k in sorted(ss):
+        #     print('{0}: {1}, '.format(k, ss[k]), end='')
+        # print()
 
-        # sentences = self.get_tweets(keywords, num_items=100)
-        sentiment_analyser = SentimentIntensityAnalyzer()
-        pos_sen = 0
-        neg_sen = 0
-        for sen in cooking_sentences:
-            result = sentiment_analyser.polarity_scores(sen) # returns ex: {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
-            # print(f"{result}   ==================> {sen}")
-            if result['pos'] > sentiment_pct: pos_sen += 1
-            elif result['neg'] > sentiment_pct: neg_sen += 1
-            # print("ss: ", ss)
-            # for k in sorted(ss):
-            #     print('{0}: {1}, '.format(k, ss[k]), end='')
-            # print()
-
-        count = pos_sen + neg_sen
-        if count > 0:
-            return int((pos_sen / count) * 100), pos_sen
-        else:
-            return 0, 0
-
-    except:
+    count = pos_sen + neg_sen
+    if count > 0:
+        return int((pos_sen / count) * 100), pos_sen
+    else:
         return 0, 0
+
+    # except:
+    #     return 0, 0
 
 
 if not os.path.isfile(TOPIC_MODELLING_CLASSFIER_PATH):

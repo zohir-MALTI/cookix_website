@@ -35,5 +35,24 @@
 
         </div>
 
+    <h2>Similar recipes :</h2>
+    <div class="row">
+        {% for recommended_recipe in recommended_recipes %}
+            <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
+                <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
+                <div class="card-body pb0">
+                    <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
+                    <hr width="90%">
+                    <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
+                </div>
+                <div class="card-footer border-warning bt0">
+                    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+                    <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
 
 {% endblock %}
