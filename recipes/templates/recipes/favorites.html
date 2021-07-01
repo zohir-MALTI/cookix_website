@@ -15,7 +15,7 @@
     </div>
     <div class="card-footer border-warning bt0">
       <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
-      <span style="float: right"> {{ recipe.price_per_serving }}$</span>
+      <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
     </div>
   </div>
   {% endfor %}

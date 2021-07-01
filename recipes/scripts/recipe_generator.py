@@ -224,9 +224,6 @@ def generate_sentences(model, input_sentence: list, steps_count: int=10):
     with open(INDEX_TO_WORD_FILE, 'rb') as file:
         index_to_word = pickle.load(file)
 
-
-
-
     input_sentence_list = input_sentence.copy()
     word_to_index = {v: k for k, v in index_to_word.items()}
 
@@ -281,12 +278,9 @@ def generate_sentences(model, input_sentence: list, steps_count: int=10):
         while predicted_word_id not in stop_words_idx and predicted_word_id in last_N_words \
                 and predicted_word_id not in [word_to_index["."], word_to_index[","]] :
             # print("TTTTTTTTTTTTTTTTT")
-            print("LAST WORDS : ", " ".join([index_to_word[w] for w in last_N_words]))
-            print("PRED1 : ", index_to_word[predicted_word_id])
+
             predicted_word_id = predicted_idx_asc[:, -i][0]
-            print("PRED2 : ", index_to_word[predicted_word_id])
             i += 1
-            print("==================")
 
         input_sentence_list.append(predicted_word_id)
         if predicted_word_id == sentences_delimiter : generated_sen_count += 1

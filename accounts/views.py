@@ -53,8 +53,6 @@ def settings(request):
     print(user)
     if request.method == 'POST':
         username = request.POST["username"].lower()
-        print("seeeeeeeeetiings")
-        print("passs: ",request.POST["password"])
         user.username = username
         user.last_name = request.POST["lastname"]
         user.first_name = request.POST["firstname"]
@@ -64,11 +62,6 @@ def settings(request):
         return render(request, 'accounts/settings.html', {"user": user,
                                                           "success_msg": "Your changes have been updated successfully!"})
 
-    # if request.method == 'POST':
-    #     print("seeeeeeeeetiings")
-    #     user_settings.update(request.POST["vegetables"], request.POST["gluten"], request.POST["dairy"], request.POST["pork"],
-    #                          request.POST["oven"], request.POST["microwave"], request.POST["blender"])
-    # return render(request, 'accounts/settings.html', {"success_msg": "Your changes have been updated successfully!"})
     else:
         return render(request, 'accounts/settings.html', {"user": user})
 

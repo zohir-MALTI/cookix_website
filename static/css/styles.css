@@ -100,6 +100,20 @@ a {
   overflow: hidden;
 }
 
+.gen-text {
+  padding: 20px;
+  border: 1px solid black;
+  background-color: antiquewhite;
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  background-color: #ffbf29;
+}
+
+.progress-bar {
+  height: 30px;
+}
+
 .todays-special {
   position: relative;
   text-align: center;

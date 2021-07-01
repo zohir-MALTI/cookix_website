@@ -21,7 +21,7 @@ from sklearn.cluster import KMeans
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 # from cookix_website import twitter_stats
 from . import UTILS_FOLDER_PATH
-
+from nltk.corpus import stopwords
 
 CLASSIFIER_NAME = UTILS_FOLDER_PATH+"recommendation_classifier.pickle"
 RECIPES_INGREDIENTS_DF = UTILS_FOLDER_PATH+"recipes_by_ing_df.csv"
@@ -323,7 +323,7 @@ def detail(request, recipe_id):
         recipe_disliked_by_user = True
 
 
-# comments analysis
+    # comments analysis
     comments_with_sentiment = []
     if len(recipe_comments) > 0:
         sentiment_analyser = SentimentIntensityAnalyzer()
@@ -359,9 +359,11 @@ def detail(request, recipe_id):
     rec_recipes = content_based_rec(recipe_id)
     rec_recipes = Recipe.objects.filter(pk__in=rec_recipes)
     # get Twitter statistics
-    recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in recipe.title.lower()][:3]
-    positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=["bitcoin", "ETH", "olive"], #recipe_ingredients_keywords
-                                                                     num_items=10)
+    stop_words = set(stopwords.words('english'))
+    recipe_ingredients_keywords = [w for w in recipe.title.lower().split(" ") if w not in stop_words][:3]
+    print("KKKKKKKKKKKK: ", recipe_ingredients_keywords)
+    positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=recipe_ingredients_keywords,
+                                                                     num_items=1000)
 
     return render(request, 'recipes/detail.html',
                   {'recipe': recipe, 'steps': steps, 'equipments': equipments, 'summary': summary,
@@ -392,14 +394,57 @@ def recipe_generation(request):
             beginning_sentence = steps_beginnings_sentences_dict[beginning_sentence]
         sentences_count = request.POST.get("sentences_count")
         generated_recipe = generate_sentences(generator_model, beginning_sentence, int(sentences_count))
+        recipes_idx = encode_generated_recipe(generated_recipe)
         recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in generated_recipe]
+
+        # get a list of similar recipes
+
+        rec_recipes = Recipe.objects.filter(pk__in=recipes_idx)
 
         return render(request, 'recipes/recipe_generation.html',
                       {'beginning_sentence': beginning_sentence, 'sentences_count': sentences_count,
                        'generated_recipe': generated_recipe,
-                       'recipe_ingredients_keywords': recipe_ingredients_keywords})
+                       'recipe_ingredients_keywords': recipe_ingredients_keywords,
+                       'recommended_recipes': rec_recipes})
     else:
         return render(request, 'recipes/recipe_generation_settings.html')
+
+
+def encode_generated_recipe(generated_recipe, num_results=12):
+
+    stopwords = ['tbs', 'tablespoon', 'tablespoons', 'cup', 'tsp',
+                 'tbsp', 'teaspoon', 'pound', 'tbsps', 'piece',
+                 'ounce', 'slice', 'seed', 'medium', 'ozs',
+                 'head', 'baby', 'inch', 'half', 'pinch', 'strip',
+                 'handful', 'fat', 'stalk']
+    nlp = spacy.load('en_core_web_lg')
+
+    ing = str(generated_recipe).lower()
+    # ing = re.sub("\b(tbs|\d+)\b", "", ing)
+    ing = re.sub(",", " , ", ing)
+    doc = nlp(ing)
+
+    recipe_ings = [token.lemma_ for token in doc if not token.is_stop
+                   and token.pos_ == 'NOUN'
+                   and str(token) not in stopwords
+                   and len(str(token)) > 2]
+    print(recipe_ings)
+
+    recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
+    ing_cols = recipes_ing_df.columns
+    encoded_recipe = [TOKEN_IN_TITLE_FACTOR if ing in recipe_ings else 0 for ing in ing_cols]
+    recipe_array = np.array(encoded_recipe).reshape(1, -1)
+    #print(encoded_recipe)
+
+    file = open(CLASSIFIER_NAME, 'rb')
+    nearest_neighbors_algo = pickle.load(file)
+    file.close()
+
+    distances, nearest_idx = nearest_neighbors_algo.kneighbors(recipe_array, n_neighbors=num_results)
+    real_idx_recipes = [recipes_ing_df.index[idx] for idx in nearest_idx[0]]
+
+    return real_idx_recipes
+
 
 
 # give a highest factor (factor of 10 instead of 1) to the ingredients included in the title

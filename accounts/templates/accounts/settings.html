@@ -8,18 +8,18 @@
 
     <form method="POST"  action="{% url 'settings' %}">
         {% csrf_token %}
-        Nom d'utilisateur: <br>
+        Username: <br>
         <input type="text" name="username"  value="{{ user.username }}" /> <br>
         Email: <br>
         <input type="email" name="email" readonly disabled value="{{ user.email }}" /> <br>
-        Nom: <br>
+        Lastname: <br>
         <input type="text" name="lastname" value="{{ user.last_name }}" /> <br>
-        Prénom: <br>
+        Firstname: <br>
         <input type="text" name="firstname" value="{{ user.first_name }}" /> <br>
-        Mot de passe: <br>
+        Password: <br>
         <input type="password" name="password" /> <br>
         <br><br>
-        <input type="submit" class="btn btn-warning" value="Modifier !" name="submit">
+        <input type="submit" class="btn btn-warning" value="Modify" name="submit">
     </form>
     {% if error %}
         <p style="color: darkgreen">{{ success_msg }}</p>

@@ -1,10 +1,5 @@
 {% extends 'base.html' %}
 
-<!--https://www.regal.fr/recettes/plats/roti-de-porc-farci-au-reblochon-en-croute-de-jambon-cru-18250-->
-<!--https://www.hervecuisine.com/recette/recette-des-crepes-sans-oeuf-et-sans-lactose/-->
-<!--https://www.supertoinette.com/recette/4860/endives-gratinees-au-maroilles.html?diaporama=319-->
-<!--https://www.cuisine-etudiant.fr/recette/8164-mac-and-cheese-->
-
 {% block content %}
 
     <h3>{{ recipe.title }}</h3>
@@ -36,8 +31,8 @@
 
             <div class="row">
                 <div class="btn-group" role="group" aria-label="Basic example" style="width: 100%">
-                    <button type="button" class="btn btn-success {% if recipe_liked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>{{ likes_count }}</span></a></button>
-                    <button type="button" class="btn btn-danger {% if recipe_disliked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>{{ dislikes_count }}</span></a></button>
+                    <button type="button" class="btn btn-success {% if recipe_liked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>Like ({{ likes_count }})</span></a></button>
+                    <button type="button" class="btn btn-danger {% if recipe_disliked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>Dislike ({{ dislikes_count }})</span></a></button>
                 </div>
 
             </div>
@@ -50,8 +45,8 @@
             <table class="table" style="text-align: center">
                 <thead>
                 <tr>
-                    <th>Comments analysis regarding this recipe</th>
-                    <th>Twitter reviews regarding this recipe</th>
+                    <th>Comments score</th>
+                    <th>Twitter reviews score</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -90,10 +85,10 @@
     </div>
 
 
-    <div class="row pt-2">
+    <div class="row">
         <div class="col-3">
             {% if equipments %}
-                <h2>Equipments:</h2>
+                <h2 align="center">Equipments:</h2>
                 <div class="row">
                     <div class="col-12">
                         <ul>
@@ -106,7 +101,7 @@
             {% endif %}
         </div>
         <div class="col-9 text-justify">
-            <h2>Summary:</h2>
+            <h2 align="center">Summary:</h2>
             <p>{{ summary }}</p>
         </div>
     </div>
@@ -117,7 +112,7 @@
     <div class="row">
         <div class="col-6">
             {% if ingredients %}
-                <h2>Ingredients:</h2>
+                <h2 align="center">Ingredients:</h2>
                 <div class="row">
                     <div class="col-12">
                         <ul>
@@ -132,7 +127,7 @@
 
         <div class="col-6">
             {% if steps %}
-                <h2>Steps:</h2>
+                <h2 align="center">Steps:</h2>
                 <div class="row">
                     <div class="col-12">
                         <ol>
