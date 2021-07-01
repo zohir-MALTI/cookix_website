@@ -5,14 +5,8 @@
 ########  this script allows us train the generator model   ########
 ####################################################################
 
-import tweepy as tw
-import pandas as pd
-import string
-from sklearn.feature_extraction.text import CountVectorizer
 import spacy
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import numpy as np
-import tensorflow
 import psycopg2
 import re
 from datetime import datetime
@@ -21,17 +15,16 @@ import pickle
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from nltk.stem import SnowballStemmer
 from nltk.corpus import stopwords
 from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.losses import sparse_categorical_crossentropy
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from collections import OrderedDict
-import time
 import itertools
-from .. import UTILS_FOLDER_PATH
 #import gpt_2_simple as gpt2
+
+# local imports
+from .. import UTILS_FOLDER_PATH
 
 
 nltk.download('punkt')
@@ -41,14 +34,14 @@ nltk.download('stopwords')
 ## params
 INDEX_TO_WORD_FILE = UTILS_FOLDER_PATH+"word_to_index.pickle"
 STEPS_BEGINNING_FILE = UTILS_FOLDER_PATH+"steps_beginning.pickle"
-# MODEL_NAME = "gen_weights_202106121306_seq5_4647sen_771vocab_ep500.h5"
-# MODEL_NAME = "gen_weights_with_202106132054_seq4_1359839sen_14902vocab_ep100.h5"
 MODEL_NAME = UTILS_FOLDER_PATH+"gen_weights_202106151706_seq10_1457145sen_11759vocab_ep100.h5"
 INPUT_SEQ_LENGTH = 5
 
 print('Loading spacy model ...')
 nlp = spacy.load('en_core_web_lg')
 
+
+# to clean sentences
 def preprocess_text(sentences: list):
     processed_sen = []
     all_words = []
@@ -101,12 +94,18 @@ def get_data():
     return clean_data
 
 
+# encode text sentences to numbers
+# ex: mix tomatoes , onion and garlic in a bowl
+# with a sentence length of 4, we will have:
+#        mix tomatoes , onion => and (target)
+#        tomatoes , onion and => garlic (target)
+#        , onion and garlic => in (target)
+#        ......
 def get_encoded_sentences():
 
     data = get_data()
     processed_sen, all_words = preprocess_text(data)
 
-    n_words = len(all_words)
     unique_words = list(set(all_words))
     n_unique_words = len(unique_words)
 
@@ -120,6 +119,7 @@ def get_encoded_sentences():
     steps_beginning_idx = []
     input_seq_length = 5
 
+    # get the xtrain and ytrain
     for sen in processed_sen:
         for i in range(len(sen) - input_seq_length):
             in_seq = sen[i:i + input_seq_length]
@@ -131,15 +131,13 @@ def get_encoded_sentences():
                 steps_beginning_idx.append(in_seq_index)
 
     X = np.reshape(input_sequence, (len(input_sequence), input_seq_length, 1))
-    # X = X / float(vocab_size)
-    # y = to_categorical(output_words)
+
     y = np.array(output_words.copy())
     y = np.reshape(y, (y.shape[0], 1))
     print("X shape:", X.shape)
     print("y shape:", y.shape)
 
     # save our variables
-
     with open(INDEX_TO_WORD_FILE, 'wb') as file:
         pickle.dump(index_to_word, file, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -149,6 +147,7 @@ def get_encoded_sentences():
     return X, y, n_unique_words
 
 
+# generator trainign (LSTM)
 def train_model_generator():
 
     X, y, n_unique_words = get_encoded_sentences()
@@ -158,11 +157,15 @@ def train_model_generator():
     OPTIMIZER = "adam"
 
     model = Sequential()
-    model.add(LSTM(64, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
-    # model.add(Dropout(0.1))
-    model.add(LSTM(32))
-    # model.add(Dropout(0.1))
-    # model.add(LSTM(32))
+    model.add(Embedding(n_unique_words, 200))
+    model.add(LSTM(200))
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.2))
+    model.add(Dense(128, activation="relu"))
+    model.add(Dropout(0.2))
+    model.add(Dense(64, activation="relu"))
+    model.add(Dropout(0.1))
+    model.add(Dense(64, activation="relu"))
     model.add(Dense(n_unique_words, activation='softmax'))
 
     model.summary()
@@ -171,7 +174,6 @@ def train_model_generator():
     current_time = datetime.today().strftime("%Y%m%d%H%M")
     TEXT_GEN_WEIGHTS_NAME = f"gen_weights_{current_time}_seq{INPUT_SEQ_LENGTH}_{X.shape[0]}sen_{n_unique_words}vocab_ep{EPOCHS}"
 
-    print(TEXT_GEN_WEIGHTS_NAME)
     checkpoint = ModelCheckpoint(TEXT_GEN_WEIGHTS_NAME + ".hdf5", monitor='loss', verbose=1, save_best_only=True,
                                  mode='min')
 
@@ -185,6 +187,7 @@ def train_model_generator():
     return model
 
 
+# recipes beginning extracted from our recipes
 def get_sentences_beginning():
 
     with open(INDEX_TO_WORD_FILE, 'rb') as file:
@@ -200,23 +203,16 @@ def get_sentences_beginning():
                                         "coat", "cook", "cut", "fill", "first", "grind",
                                         "halve", "heat", "light", "make", "marinate", "melt", "mix", "peel",
                                         "place", "preheat", "put", "slice", "soak", "stir"]:
-            # print(f"{sentence_text[0]}")
+
             sentence_text = ' '.join(sentence_text)
             steps_beginning_dict[sentence_text] = sen
 
-    # print(steps_beginning_dict.keys())
-    # print([w[0] for w in steps_beginning_dict.keys()])
     steps_beginning_dict = OrderedDict(sorted(steps_beginning_dict.items(), key=lambda t: t[0]))
 
-
-    # random_seq_index = np.random.randint(0, len(steps_beginning_idx) - 1)
-    # random_seq = steps_beginning_idx[random_seq_index]
-    #
-    # word_sequence = [index_to_word[value] for value in random_seq]
-    # print(f"Random sentence: '{random_sen}'")
     return steps_beginning_dict
 
 
+# function that generates a recipe
 def generate_sentences(model, input_sentence: list, steps_count: int=10):
 
     # model = load_model(MODEL_NAME + ".h5")
@@ -224,6 +220,7 @@ def generate_sentences(model, input_sentence: list, steps_count: int=10):
     with open(INDEX_TO_WORD_FILE, 'rb') as file:
         index_to_word = pickle.load(file)
 
+    # encode the recipe beginning
     input_sentence_list = input_sentence.copy()
     word_to_index = {v: k for k, v in index_to_word.items()}
 
@@ -233,52 +230,23 @@ def generate_sentences(model, input_sentence: list, steps_count: int=10):
     sentences_delimiter = word_to_index["."]
     generated_sen_count = input_sentence_list.count(sentences_delimiter)
     input_seq_length = len(input_sentence_list) # model.input_shape[1]
-    # print("AAAA: ", input_sentence_list)
-    # print("AAAA: ", )
 
+    # generate word by word without repetition
     words_count = 0
-    # print("AAAA: ", input_sentence_list)
-    # print("AAAA: ", type(input_sentence_list))
-    # print("AAAA: ", input_seq_length)
-    # print("AAAA: ", model.input_shape)
     while generated_sen_count <= steps_count:
         input_sentence_arr = np.reshape(input_sentence_list[-input_seq_length:], (1, input_seq_length, 1))
-        # print("BBBBBB: ", input_sentence_arr)
-        # print("BBBBBB: ", type(input_sentence_arr))
-
         predicted_word_index = model.predict(input_sentence_arr, verbose=0)
-        # print(predicted_word_index)
-        # print(predicted_word_index.shape)
-        # predicted_word_id = np.argmax(predicted_word_index)
         predicted_idx_asc = np.argsort(predicted_word_index, axis=1, kind='quicksort')
-        # predicted_word_id = np.argmax(predicted_word_index)
-        # print("PPPPPPP: ", predicted_word_id)
         predicted_word_id = predicted_idx_asc[:, -1][0]
-        # print("PPPPPPP: ", input_sentence_list)
-        # print("LIST : ", np.reshape(input_sentence_arr, (input_sentence_arr.shape[1])))
-        # print("LIST : ", input_sentence_list)
+
 
         # avoid words repetition
         # if the generated word is not a stopwords and appears among the N last words, do not add it
-        # print("ZZZZZZZZZ: ", len(input_sentence_arr))
-        # print("MMMMMMIN : ", min(len(input_sentence_list), 15))
-        keeped_length_words = min(len(input_sentence_list), 15)
-        # print("NNNNNNN : ", keeped_length_words)
-        # last_N_words = np.reshape(input_sentence_arr, (input_sentence_arr.shape[1]))[-keeped_length_words:]
+        keeped_length_words = min(len(input_sentence_list), 20)
         last_N_words = input_sentence_list[-keeped_length_words:]
-        # print("ZZZZZZZZZ: ", input_sentence_list)
-        # print("ZZZZZZZZZ: ", last_N_words)
-        # print(input_sentence_list)
-        # print(len(input_sentence_list))
-
-        # print(bb[-3:])
-        # print(input_sentence_arr[,-4])
-        # break
         i = 2
         while predicted_word_id not in stop_words_idx and predicted_word_id in last_N_words \
                 and predicted_word_id not in [word_to_index["."], word_to_index[","]] :
-            # print("TTTTTTTTTTTTTTTTT")
-
             predicted_word_id = predicted_idx_asc[:, -i][0]
             i += 1
 
@@ -293,6 +261,7 @@ def generate_sentences(model, input_sentence: list, steps_count: int=10):
     return final_output
 
 
+# get all available keywords for recipes without words duplicate
 def get_ing_keywords(output_name=UTILS_FOLDER_PATH+"ingredients_keywords.pickle"):
 
     if not os.path.isfile(output_name):
@@ -338,7 +307,6 @@ def get_ing_keywords(output_name=UTILS_FOLDER_PATH+"ingredients_keywords.pickle"
                 ingredients.append(doc[-1].text)
 
         ingredients = list(set(ingredients))
-        print(len(ingredients))
 
         # remove duplicates ["oil", "oi", "olive oil", "olive"] => ["olive oil"]
         ings_lengths_dict = {}
@@ -356,7 +324,6 @@ def get_ing_keywords(output_name=UTILS_FOLDER_PATH+"ingredients_keywords.pickle"
                     ings_without_duplicates.remove(w)
                     break
 
-        print(len(ings_without_duplicates))
         # save the object, to load it after
         with open(output_name, 'wb') as file:
             pickle.dump(ings_without_duplicates, file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -367,7 +334,7 @@ def get_ing_keywords(output_name=UTILS_FOLDER_PATH+"ingredients_keywords.pickle"
 
     return ings_without_duplicates
 
-
+"""
 def load_GPT2():
     # gpt2.download_gpt2(model_name="124M")
     sess = gpt2.start_tf_sess()
@@ -376,11 +343,12 @@ def load_GPT2():
     gpt2.generate(sess,
                   length=250,
                   temperature=0.7,
-                  prefix="LORD",
+                  prefix="mix in a bowl",
                   nsamples=5,
                   batch_size=5
                   )
 
+"""
 
 print("Loading generator model ...")
 if MODEL_NAME is None:
@@ -389,6 +357,3 @@ else:
     generator_model = load_model(MODEL_NAME)
 
 INGREDIENTS_KEYWORDS = get_ing_keywords()
-# model = Sequential()
-# model.load_weights(MODEL_NAME)
-# model.compile(loss="sparse_categorical_crossentropy", optimizer="adam")

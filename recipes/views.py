@@ -5,9 +5,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import *
-from . import generate_sentences, generator_model, get_sentences_beginning, INGREDIENTS_KEYWORDS
-from . import get_users_feedbacks
-from .models import *
 from django.db.models import Q
 import spacy
 import re
@@ -19,69 +16,35 @@ from sklearn.neighbors import NearestNeighbors
 import pickle
 from sklearn.cluster import KMeans
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-# from cookix_website import twitter_stats
-from . import UTILS_FOLDER_PATH
 from nltk.corpus import stopwords
+# local imports
+from . import UTILS_FOLDER_PATH
+from . import generate_sentences, generator_model, get_sentences_beginning, INGREDIENTS_KEYWORDS
+from . import get_users_feedbacks
+from .models import *
 
+# MODEL NAMES & PARAMS
 CLASSIFIER_NAME = UTILS_FOLDER_PATH+"recommendation_classifier.pickle"
 RECIPES_INGREDIENTS_DF = UTILS_FOLDER_PATH+"recipes_by_ing_df.csv"
 TOKEN_IN_TITLE_FACTOR = 10
 
+
 def home(request):
-    recipes = Recipe.objects.all()[4000:4009]
-    recipes_min = recipes[:100]
-    # print(len(recipes))
+    random_recipes = Recipe.objects.all()[4000:4009]
+    # whether to display cluster
     user_id = request.user.id
     if user_id is not None and len(Likes.objects.all().filter(user_id=user_id)) > 0:
         clusters = custom_recipes_clusters(user_id)
     else:
         clusters = None
-    return render(request, 'recipes/home.html', {'recipes': recipes_min,
+    return render(request, 'recipes/home.html', {'recipes': random_recipes,
                                                  'recipes_count': Recipe.objects.count(),
-                                                 'todays_special': recipes_min[0],
+                                                 'todays_special': random_recipes[0],
                                                  'clusters': clusters})
+
 
 def about_us(request):
     return render(request, 'recipes/about_us.html')
-
-
-def todays_special_recipe(user_id):
-
-    if not os.path.isfile(CLASSIFIER_NAME):
-        print('Creating CLASSIFIER!')
-        train_model()
-
-    recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
-    file = open(CLASSIFIER_NAME, 'rb')
-    nearest_neighbors_algo = pickle.load(file)
-    file.close()
-
-    pks = Likes.objects.all().filter(user_id=user_id)
-    liked_recipes_idx = list([recipe.recipe_id.id for recipe in pks])
-    random_idx = random.choice(liked_recipes_idx)
-
-    recipe_array = recipes_ing_df.loc[int(random_idx), :].to_numpy().reshape(1, -1)
-    distances, nearest_idx = nearest_neighbors_algo.kneighbors(recipe_array, n_neighbors=10)
-    real_idx_recipes = [recipes_ing_df.index[idx] for idx in nearest_idx[0]]
-
-    # get for each similar recipe, its array
-    similar_recipes = []
-    for recipe_id in real_idx_recipes:
-        recipe = list(recipes_ing_df.loc[int(recipe_id), :])
-        recipe = [1 if x == TOKEN_IN_TITLE_FACTOR else x for x in recipe]
-        similar_recipes.append(recipe)
-
-    similar_recipes_arr = np.array(similar_recipes)
-    n_clusters = 6
-    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(similar_recipes_arr)
-    #labels = zip(similar_recipes_idx, kmeans.labels_)
-    labels = kmeans.labels_
-    recipes_per_cluster = {}
-    for cluster in range(n_clusters):
-        cluster_idx = [idx for i, idx in enumerate(real_idx_recipes) if labels[i] == cluster]
-        recipes_per_cluster[cluster+1] = Recipe.objects.filter(pk__in=cluster_idx)
-
-    return recipes_per_cluster
 
 
 def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
@@ -90,13 +53,14 @@ def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
         print('Creating CLASSIFIER!')
         train_model()
 
+    # load the classifier
     recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
     file = open(CLASSIFIER_NAME, 'rb')
     nearest_neighbors_algo = pickle.load(file)
     file.close()
 
+    # get all liked recipe so that we can get their similar recipes
     pks = Likes.objects.all().filter(user_id=user_id)
-
     liked_recipes_idx = list([recipe.recipe_id.id for recipe in pks])
 
     similar_recipes_idx = []
@@ -119,28 +83,21 @@ def custom_recipes_clusters(user_id, n_clusters=6, num_results=30):
 
     similar_recipes_arr = np.array(similar_recipes)
 
+    # train a kmeans
     kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(similar_recipes_arr)
-    #labels = zip(similar_recipes_idx, kmeans.labels_)
     labels = kmeans.labels_
     recipes_per_cluster = {}
     for cluster in range(n_clusters):
         cluster_idx = [idx for i, idx in enumerate(similar_recipes_idx) if labels[i] == cluster]
-        # print(cluster_idx)
-        # print(Recipe.objects.filter(pk__in=cluster_idx))
+        # rename the cluster
         recipes_cluster_keywords = [recipe.title.strip().split(" ") for recipe in Recipe.objects.filter(pk__in=cluster_idx)]
-        # print(recipes_cluster_titles)
-        # recipes_cluster_keywords = " ".join(recipes_cluster_titles)
         recipes_cluster_keywords = list(itertools.chain(*recipes_cluster_keywords))
-        # recipes_cluster_keywords = [title.split("") for title in Recipe.objects.filter(pk__in=cluster_idx)]
-        # print(recipes_cluster_keywords)
         cluster_name = Counter(recipes_cluster_keywords).most_common(1)[0][0]
-        # print(cluster_name)
-        # print(cluster_name[0])
         recipes_per_cluster[cluster_name] = Recipe.objects.filter(pk__in=cluster_idx)
 
     return recipes_per_cluster
 
-
+# get all the recipes for each diet
 def diet_types(request, diet_type):
     if request.method == 'GET':
         page_number = request.GET.get("page")
@@ -170,6 +127,7 @@ def diet_types(request, diet_type):
                                                        'query': diet_type})
 
 
+# get all the recipes for each dish type
 def dish_types(request, dish_type):
     if request.method == 'GET':
         page_number = request.GET.get("page")
@@ -187,6 +145,7 @@ def dish_types(request, dish_type):
                                                        'query': dish_type})
 
 
+# get all the recipes for each cuisine type
 def cuisine_types(request, cuisine_type):
     if request.method == 'GET':
         page_number = request.GET.get("page")
@@ -209,11 +168,11 @@ def favorites(request):
     pks = Likes.objects.all().filter(user_id=request.user.id)
     pks = [recipe.recipe_id for recipe in pks]
     liked_recipes = Recipe.objects.filter(title__in=list(pks)).all()
-    # liked_recipes = Recipe.objects.filter(pk__in=Likes.objects.filter(user_id=request.user.id))
 
     return render(request, 'recipes/favorites.html', {'recipes': liked_recipes})
 
 
+# generic function to add like if exists, remove it otherwise
 def add_action(request, recipe_likes_dislikes, recipe_id):
     if recipe_likes_dislikes.filter(user_id=request.user.id, recipe_id=recipe_id).exists():
         recipe_likes_dislikes.filter(user_id=request.user, recipe_id=get_object_or_404(Recipe, pk=recipe_id)).delete()
@@ -241,7 +200,6 @@ def add_dislike(request, recipe_id):
 def add_comment(request, recipe_id):
     if request.method == 'POST':
         recipe_comments = Comments.objects
-        #add_action(request, recipe_comments, recipe_id)
         recipe_comments.create(user_id=request.user,
                                recipe_id=get_object_or_404(Recipe, pk=recipe_id),
                                comment=request.POST["comment"])
@@ -249,18 +207,12 @@ def add_comment(request, recipe_id):
         return redirect('/' + str(recipe_id))
 
 
+# Search engine by keyword
 def search(request):
     if request.method == 'GET':
         keys = request.GET.get("search")
-        print(keys)
         page_number = request.GET.get("page")
-        #recipes = Recipe.objects.filter(
-        #    Q(title__icontains=keys) #| Q(ingredients__icontains=keys)
-        #Q(equipments__icontains=keys)
-        #)  # filter(search='cheese')  / filter(body_text__search='cheese')
-        #recipes = Recipe.objects.annotate(search=SearchVector('ingredients')).filter(search=keys)
         recipes = Recipe.objects.annotate(search=SearchVector('ingredients')).filter(search=SearchQuery(keys))
-        #recipes = Recipe.objects.annotate(rank=SearchRank(SearchVector('ingredients'), SearchQuery(keys))).order_by('-rank')
         paginator = Paginator(recipes, 36)
         try:
             recipes_obj = paginator.get_page(page_number)
@@ -273,6 +225,7 @@ def search(request):
                                                        'query': keys})
 
 
+# detail page for each recipe
 def detail(request, recipe_id):
     recipe = get_object_or_404(Recipe, pk=recipe_id)
     summary = re.sub('<[^<]+?>', '', recipe.summary)
@@ -308,9 +261,7 @@ def detail(request, recipe_id):
         # default image
         pass
 
-    # recommended_recipes = Recipe.objects.all()
-    # recommended_recipes = recommended_recipes[2800:2803]
-
+    # counts
     recipe_likes_count = Likes.objects.filter(recipe_id=recipe_id).count()
     recipe_dislikes_count = Dislikes.objects.filter(recipe_id=recipe_id).count()
     recipe_comments = Comments.objects.filter(recipe_id=recipe_id)
@@ -331,9 +282,8 @@ def detail(request, recipe_id):
         neg_comments_count = 0
         sentiment_pct = 0.2
 
-        # recipe_comments_text = [comment.comment for comment in recipe_comments]
         for comment_obj in recipe_comments:
-            result = sentiment_analyser.polarity_scores(comment_obj.comment)  # returns ex: {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
+            result = sentiment_analyser.polarity_scores(comment_obj.comment)  # returns : {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
             if result['pos'] > sentiment_pct:
                 pos_comments_count += 1
                 comments_with_sentiment.append((comment_obj, "pos"))
@@ -358,10 +308,10 @@ def detail(request, recipe_id):
     # recommended recipes
     rec_recipes = content_based_rec(recipe_id)
     rec_recipes = Recipe.objects.filter(pk__in=rec_recipes)
+
     # get Twitter statistics
     stop_words = set(stopwords.words('english'))
     recipe_ingredients_keywords = [w for w in recipe.title.lower().split(" ") if w not in stop_words][:3]
-    print("KKKKKKKKKKKK: ", recipe_ingredients_keywords)
     positive_tweets_pct, positive_tweets_count = get_users_feedbacks(keywords=recipe_ingredients_keywords,
                                                                      num_items=1000)
 
@@ -382,6 +332,7 @@ def recipe_generation_settings(request):
     return render(request, 'recipes/recipe_generation_settings.html', {"steps_beginnings_sentences": get_sentences_beginning()})
 
 
+# generation recipe result
 def recipe_generation(request):
     if request.method == 'POST':
 
@@ -394,23 +345,24 @@ def recipe_generation(request):
             beginning_sentence = steps_beginnings_sentences_dict[beginning_sentence]
         sentences_count = request.POST.get("sentences_count")
         generated_recipe = generate_sentences(generator_model, beginning_sentence, int(sentences_count))
-        recipes_idx = encode_generated_recipe(generated_recipe)
-        recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in generated_recipe]
-
         # get a list of similar recipes
+        recipes_idx = get_similar_recipes(generated_recipe)
+        similar_recipes = Recipe.objects.filter(pk__in=recipes_idx)
 
-        rec_recipes = Recipe.objects.filter(pk__in=recipes_idx)
+        # recipe keywords
+        recipe_ingredients_keywords = [w for w in list(INGREDIENTS_KEYWORDS) if w in generated_recipe]
 
         return render(request, 'recipes/recipe_generation.html',
                       {'beginning_sentence': beginning_sentence, 'sentences_count': sentences_count,
                        'generated_recipe': generated_recipe,
                        'recipe_ingredients_keywords': recipe_ingredients_keywords,
-                       'recommended_recipes': rec_recipes})
+                       'recommended_recipes': similar_recipes})
     else:
         return render(request, 'recipes/recipe_generation_settings.html')
 
 
-def encode_generated_recipe(generated_recipe, num_results=12):
+# encode the generated recipe then find the similar ones
+def get_similar_recipes(generated_recipe, num_results=12):
 
     stopwords = ['tbs', 'tablespoon', 'tablespoons', 'cup', 'tsp',
                  'tbsp', 'teaspoon', 'pound', 'tbsps', 'piece',
@@ -420,22 +372,20 @@ def encode_generated_recipe(generated_recipe, num_results=12):
     nlp = spacy.load('en_core_web_lg')
 
     ing = str(generated_recipe).lower()
-    # ing = re.sub("\b(tbs|\d+)\b", "", ing)
     ing = re.sub(",", " , ", ing)
     doc = nlp(ing)
-
     recipe_ings = [token.lemma_ for token in doc if not token.is_stop
                    and token.pos_ == 'NOUN'
                    and str(token) not in stopwords
                    and len(str(token)) > 2]
-    print(recipe_ings)
 
+    # transform from text to array
     recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
     ing_cols = recipes_ing_df.columns
     encoded_recipe = [TOKEN_IN_TITLE_FACTOR if ing in recipe_ings else 0 for ing in ing_cols]
     recipe_array = np.array(encoded_recipe).reshape(1, -1)
-    #print(encoded_recipe)
 
+    # get similar recipes through our kneighbor
     file = open(CLASSIFIER_NAME, 'rb')
     nearest_neighbors_algo = pickle.load(file)
     file.close()
@@ -446,8 +396,7 @@ def encode_generated_recipe(generated_recipe, num_results=12):
     return real_idx_recipes
 
 
-
-# give a highest factor (factor of 10 instead of 1) to the ingredients included in the title
+# get recommended recipes based on its content
 def content_based_rec(recipe_id, num_results=30):
 
     if not os.path.isfile(CLASSIFIER_NAME):
@@ -466,12 +415,14 @@ def content_based_rec(recipe_id, num_results=30):
     return real_idx_recipes
 
 
+# train classifier model
+# give a highest factor (factor of 10 instead of 1) to the ingredients included in the title
 def train_model(max_ingredients=500):
 
     recipes = Recipe.objects.all()
-    recipes_ids = list([recipe.id for recipe in recipes])#[:n]
-    recipes_ing = list(recipes.only('ingredients'))#[:n]
-    recipes_titles = list(recipes.only('title'))#[:n]
+    recipes_ids = list([recipe.id for recipe in recipes])
+    recipes_ing = list(recipes.only('ingredients'))
+    recipes_titles = list(recipes.only('title'))
 
     stopwords = ['tbs', 'tablespoon', 'tablespoons', 'cup', 'tsp',
                  'tbsp', 'teaspoon', 'pound', 'tbsps', 'piece',
@@ -485,6 +436,7 @@ def train_model(max_ingredients=500):
     ingredients_by_recipe = {}
     titles_by_recipe = {}
     st = time.time()
+    # get most used keywords
     for recipe_id, ing_rec, title in zip(recipes_ids, recipes_ing, recipes_titles):
         ing = str(ing_rec).lower()
         # ing = re.sub("\b(tbs|\d+)\b", "", ing)
@@ -513,11 +465,13 @@ def train_model(max_ingredients=500):
         titles_by_recipe[recipe_id] = list(set(ing_title))
         all_ingredients.append(ing_title)
 
-    print("Training time: ",time.time() - st)
+    # get most common ing
     all_ingredients = list(itertools.chain(*all_ingredients))
     ing_counts = Counter(all_ingredients).most_common(max_ingredients)
     all_ingredients = [i[0] for i in ing_counts]
 
+    # create a matrix so that each column is a feature (ingredient)
+    # and each line is a recipe vector
     recipes_ing_df = pd.DataFrame(columns=all_ingredients, index=recipes_ids)
     for idx in recipes_ing_df.index:
         recipe_ings = ingredients_by_recipe[idx]
@@ -535,12 +489,45 @@ def train_model(max_ingredients=500):
     file = open(CLASSIFIER_NAME, 'wb')
     pickle.dump(nearest_neighbors_algo, file)
     file.close()
+    print("Training time: ", time.time() - st)
     print('CLASSFIER SAVED!!!')
 
-    # sig_results = pd.DataFrame(sigmoid_kernel(recipes_ing_df, recipes_ing_df),
-    #                            index=recipes_ids,
-    #                            columns=recipes_ids)
-    #
-    # sig_results.to_csv('sigmoid_kernel_ingredients.csv', sep='|')
 
+def todays_special_recipe(user_id):
 
+    if not os.path.isfile(CLASSIFIER_NAME):
+        print('Creating CLASSIFIER!')
+        train_model()
+
+    # load models
+    recipes_ing_df = pd.read_csv(RECIPES_INGREDIENTS_DF, sep='|', index_col=0)
+    file = open(CLASSIFIER_NAME, 'rb')
+    nearest_neighbors_algo = pickle.load(file)
+    file.close()
+
+    # pick a random recipe
+    pks = Likes.objects.all().filter(user_id=user_id)
+    liked_recipes_idx = list([recipe.recipe_id.id for recipe in pks])
+    random_idx = random.choice(liked_recipes_idx)
+
+    recipe_array = recipes_ing_df.loc[int(random_idx), :].to_numpy().reshape(1, -1)
+    distances, nearest_idx = nearest_neighbors_algo.kneighbors(recipe_array, n_neighbors=10)
+    real_idx_recipes = [recipes_ing_df.index[idx] for idx in nearest_idx[0]]
+
+    # get for each similar recipe, its array
+    similar_recipes = []
+    for recipe_id in real_idx_recipes:
+        recipe = list(recipes_ing_df.loc[int(recipe_id), :])
+        recipe = [1 if x == TOKEN_IN_TITLE_FACTOR else x for x in recipe]
+        similar_recipes.append(recipe)
+
+    similar_recipes_arr = np.array(similar_recipes)
+    n_clusters = 6
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(similar_recipes_arr)
+    labels = kmeans.labels_
+    recipes_per_cluster = {}
+    for cluster in range(n_clusters):
+        cluster_idx = [idx for i, idx in enumerate(real_idx_recipes) if labels[i] == cluster]
+        recipes_per_cluster[cluster+1] = Recipe.objects.filter(pk__in=cluster_idx)
+
+    return recipes_per_cluster
