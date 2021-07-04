@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+
+    <h1>My settings</h1><br><br>
+
+    <form method="POST"  action="{% url 'settings' %}">
+        {% csrf_token %}
+        Username: <br>
+        <input type="text" name="username"  value="{{ user.username }}" /> <br>
+        Email: <br>
+        <input type="email" name="email" readonly disabled value="{{ user.email }}" /> <br>
+        Lastname: <br>
+        <input type="text" name="lastname" value="{{ user.last_name }}" /> <br>
+        Firstname: <br>
+        <input type="text" name="firstname" value="{{ user.first_name }}" /> <br>
+        Password: <br>
+        <input type="password" name="password" /> <br>
+        <br><br>
+        <input type="submit" class="btn btn-warning" value="Modify" name="submit">
+    </form>
+    {% if error %}
+        <p style="color: darkgreen">{{ success_msg }}</p>
+        <br>
+    {% endif %}
+
+
+
+
+
+
+{% endblock %}
+

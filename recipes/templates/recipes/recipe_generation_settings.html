@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <br>
+
+
+
+    <h1 align="center">Recipe generation</h1>
+
+    </div>
+
+    <div class="generation-block">
+        <h2><span class="oi oi-warning"></span>Disclaimer</h2>
+
+            - This is a BETA version of recipes generation, it is still under study.<br>
+            - The generated recipe may contain few misspelled words, this is related to the input data quality.<br>
+            - If you don't like the generated recipe, please feel free to regenerate a new one as many times as you want.
+
+    </div>
+
+    <div class="container">
+
+
+
+        <form method="POST" action="{% url 'recipe_generation' %}">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-lg-9">
+                    Please choose a sentence to begin with your recipe
+
+                    <select class="form-control" name="beginning_sentence">
+                        <option value="random">[RANDOM SENTENCE]</option>
+                        {% for sentence, sentence_idx in steps_beginnings_sentences.items %}
+                            <option value="{{ sentence }}">{{ sentence }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group col-lg-3">
+                    Sentences count (min 5)
+                    <input type="number" name="sentences_count" value="10" min="5" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-warning">Generate recipe</button>
+
+        </form>
+
+<br><br><br><br><br><br>
+
+
+{% endblock %}

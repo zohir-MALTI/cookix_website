@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Cookix</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="{% static 'open-iconic/font/css/open-iconic-bootstrap.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'logo.png' %}" height=60 class="d-inline-block align-top" />
+                <!--      <img src="" height=60 class="d-inline-block alighn-top" />-->
+
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-item nav-link" href="{% url 'home' %}"><span class="oi oi-home"></span> Home</a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Diets
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'dairy-free' %}';">Dairy-free</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'gluten-free' %}';">Gluten free</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'sustainable' %}';">Sustainable</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'vegan' %}';">Vegan</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'vegetarian' %}';">Vegetarian</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'very-healthy' %}';">Very healthy</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'diet_types' 'very-popular' %}';">Very popular</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Dish types
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'morning-meal' %}';">Morning meal</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'brunch' %}';">Brunch</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'lunch' %}';">Lunch</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'dinner' %}';">Dinner</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'main-dish' %}';">Main dish</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'side-dish' %}';">Side dish</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'salad' %}';">Salad</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'dish_types' 'soup' %}';">Soup</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Cuisine types
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'American' %}';">American</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Asian' %}';">Asian</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Chinese' %}';">Chinese</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'European' %}';">European</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'French' %}';">French</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Greek' %}';">Greek</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Korean' %}';">Korean</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Indian' %}';">Indian</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Italian' %}';">Italian</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Japanese' %}';">Japanese</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Jewish' %}';">Jewish</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Latin-American' %}';">Latin American</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Mediterranean' %}';">Mediterranean</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Nordic' %}';">Nordic</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Scandinavian' %}';">Scandinavian</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'South-American' %}';">South American</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Southern' %}';">Southern</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Spanish' %}';">Spanish</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Thai' %}';">Thai</a>
+                                <a class="dropdown-item" href="#" onclick="window.location='{% url 'cuisine_types' 'Vietnamese' %}';">Vietnamese</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-item nav-link" href="{% url 'recipe_generation_settings' %}"><span class="oi oi-plus"></span>New recipe generation</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-item nav-link" href="{% url 'about_us' %}"><span class="oi oi-phone"></span>About us</a>
+                        </li>
+
+                        {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                My account (<b>{{ request.user.username }}</b>)
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item nav-link" href="{% url 'favorites' %}"><span class="oi oi-heart"></span> Favorites</a>
+                                <a class="nav-item nav-link" href="{% url 'settings' %}"><span class="oi oi-wrench"></span> Settings</a>
+                                <a class="nav-item nav-link" href="javascript:{document.getElementById('logout').submit()}" onclick=""><span class="oi oi-account-logout"></span> Logout</a>
+                                <form id="logout" method="POST" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" />
+                                </form>
+                            </div>
+                        </li>
+
+                            <li class="nav-item">
+
+                            </li>
+                            <li class="nav-item">
+
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-item nav-link" href="{% url 'signup' %}"><span class="oi oi-person"></span> Sign Up</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-item nav-link" href="{% url 'login' %}"><span class="oi oi-account-login"></span> Login</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+<br><br><br><br>
+
+
+<div class="container">
+
+    {% block content %}
+    {% endblock %}
+
+</div>
+
+
+
+<footer class="bg-dark text-center text-white mt-6 pt-6">
+    <div class="container ">
+
+        <!-- Section: Text -->
+        <section class="mt-4 mb-4">
+            <p>
+                Cookix is a french plateform for cooking recipes customized for each user
+                based on his culinary tastes.
+            </p>
+
+        </section>
+
+
+    </div>
+    <!-- Grid container -->
+
+    <!-- Copyright -->
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        © {% now "Y" %} Copyright:
+        <a class="text-white" href="cookix.tcp4.me:8000/">cookix.me</a>
+    </div>
+    <!-- Copyright -->
+</footer>
+<!-- Footer -->
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

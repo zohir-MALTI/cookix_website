@@ -1,0 +1,15 @@
+# Created by https://www.gitignore.io/api/django
+data/
+### Django ###
+*.log
+*.pot
+*.pyc
+cookix_website/__pycache__/
+recipes/__pycache__/
+local_settings.py
+db.sqlite3
+/media
+.idea/
+static/admin
+recipes_by_ing_df.csv
+recommendation_classifier.pickle

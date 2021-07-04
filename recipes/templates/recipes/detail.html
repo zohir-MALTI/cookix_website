@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h3>{{ recipe.title }}</h3>
+
+
+    <div class="row mt6">
+        <div class="col-6">
+            <img src="{{ recipe.image }}" class="img-fluid" />
+        </div>
+        <div class="col-6">
+            <table class="table" style="text-align: center">
+                <thead>
+                <tr>
+                    <th>Preparation time</th>
+                    <th>Price per serving</th>
+                    <th>Health score</th>
+                    <th>Spoonacular score</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min</td>
+                    <td><span class="oi oi-dollar"></span> {{ recipe.price_per_serving|floatformat:"1" }}</td>
+                    <td><span class="oi oi-heart"> {{ recipe.health_score }}%</td>
+                    <td><span class="oi oi-badge"> {{ recipe.spoonacular_score }}% </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="btn-group" role="group" aria-label="Basic example" style="width: 100%">
+                    <button type="button" class="btn btn-success {% if recipe_liked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_like').submit()}" style="color: white"><span class="badge rounded-pill bg-success"><span class="oi oi-thumb-up"></span>Like ({{ likes_count }})</span></a></button>
+                    <button type="button" class="btn btn-danger {% if recipe_disliked_by_user %} disabled {% endif %}" style="width: 100%"><a href="javascript:{document.getElementById('add_dislike').submit()}" style="color: white"><span class="badge rounded-pill bg-danger"><span class="oi oi-thumb-down"></span>Dislike ({{ dislikes_count }})</span></a></button>
+                </div>
+
+            </div>
+            <div class="row badges" style="justify-content: center">
+                {% for tag in tags %}
+                    <span class="badge rounded-pill bg-warning" style="margin-right: 10px;padding: 15px;">{{ tag }}</span>
+                {% endfor %}
+            </div>
+
+            <table class="table" style="text-align: center">
+                <thead>
+                <tr>
+                    <th>Comments score</th>
+                    <th>Twitter reviews score</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        {% if pos_comments_count > 0 or neg_comments_count > 0 %}
+                            <div class="progress" style="height: 30px">
+                                <div class="progress-bar bg-success" role="progressbar" aria-valuenow="{{ pos_comments_pct }}"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:{{ pos_comments_pct }}%">
+                                    {{ pos_comments_pct }}% ({{ pos_comments_count }})
+                                </div>
+                                <div class="progress-bar bg-danger" role="progressbar" aria-valuenow="{{ neg_comments_pct }}"
+                                     aria-valuemin="0" aria-valuemax="100" style="width:{{ neg_comments_pct }}%">
+                                    {{ neg_comments_pct }}% ({{ neg_comments_count }})
+                                </div>
+                            </div>
+                        {% else %}
+                            <p align="center">No comments yet !</p>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if positive_tweets_count > 0 %}
+                            <div class="progress-bar {% if positive_tweets_pct < 30 %} bg-danger {% elif positive_tweets_pct < 70 %} bg-warning {% else %} bg-success {% endif %}" role="progressbar" aria-valuenow="{{ positive_tweets_pct }}"
+                                 aria-valuemin="0" aria-valuemax="100" style="width:{% if positive_tweets_pct < 20 %} 20% {% else %}{{ positive_tweets_pct }}% {% endif %}">
+                                {{ positive_tweets_pct }}% ({{ positive_tweets_count }} tweets)
+                            </div>
+                        {% else %}
+                            <p align="center">Sorry, there are no comments for this recipe !</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-3">
+            {% if equipments %}
+                <h2 align="center">Equipments:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ul>
+                            {% for equipment in equipments %}
+                                <li>{{ equipment }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-9 text-justify">
+            <h2 align="center">Summary:</h2>
+            <p>{{ summary }}</p>
+        </div>
+    </div>
+
+    <hr width="80%">
+
+
+    <div class="row">
+        <div class="col-6">
+            {% if ingredients %}
+                <h2 align="center">Ingredients:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ul>
+                            {% for ingredient in ingredients %}
+                                <li>{{ ingredient }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-6">
+            {% if steps %}
+                <h2 align="center">Steps:</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <ol>
+                            {% for step in steps %}
+                                <li>{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr width="80%">
+
+
+{#    <div class="row">#}
+{#        <div class="col-sm-12 col-md-6 col-lg-3">#}
+{#            <iframe border=0 frameborder=0 height=250 width=400#}
+{#                    src="https://twitframe.com/show?url=https%3A%2F%2Ftwitter.com%2Fjack%2Fstatus%2F20"></iframe>#}
+{#        </div>#}
+{#        <div class="col-sm-12 col-md-6 col-lg-4">#}
+{#            <iframe border=0 frameborder=0 height=250 width=400#}
+{#                    src="https://twitframe.com/show?url=https://twitter.com/twitter/statuses/1406324223652495361"></iframe>#}
+{#        </div>#}
+{#    </div>#}
+
+
+    <h2>Comments</h2>
+    <div class="row comment">
+        <div class="col-lg-2">
+            <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="height: 105px;"/>
+        </div>
+        <div class="col-lg-10">
+            <p>
+                <strong>You</strong>
+            </p>
+            <form id="add_comment" method="POST" action="{% url 'add_comment' recipe.id %}">
+                {% csrf_token%}
+                <textarea name="comment" placeholder="add your comment here" rows="2" style="width: -webkit-fill-available;"></textarea> <br>
+                <input type="submit" class="btn btn-success" value="add" name="add" style="float: right;">
+            </form>
+        </div>
+    </div>
+
+
+    {% for comment, sentiment in comments_with_sentiment %}
+        <div class="row comment">
+            <div class="col-lg-2">
+                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid" style="height: 105px;"/>
+            </div>
+            <div class="col-lg-10">
+                <p>
+                    <strong>{{ comment.user_id }}</strong>
+                    <span class="text-secondary" style="float: right;">{{ comment.pretty_date }}</span>
+                </p>
+                <p class="comment_text">
+                    {% if sentiment == "pos" %} <span class="oi oi-check" style="color: green"></span>
+                    {% elif sentiment == "neg" %} <span class="oi oi-warning" style="color: red"></span> {% endif %}
+                    {{ comment.comment }}
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+
+
+
+    <br>
+    <h2>Recommended recipes:</h2>
+    <div class="row">
+        {% for recommended_recipe in recommended_recipes %}
+            <div class="card border-warning col-sm-12 col-md-6 col-lg-4">
+                <img src="{{ recommended_recipe.image }}" class="card-img-top" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">
+                <div class="card-body pb0">
+                    <h5 class="card-title" onclick="window.location='{% url 'detail' recommended_recipe.id %}';" style="cursor: pointer;">{{ recommended_recipe.title }}</h5>
+                    <hr width="90%">
+                    <p class="card-text pt0"><small>{{ recommended_recipe.summary_of_summary }}</small></p>
+                </div>
+                <div class="card-footer border-warning bt0">
+                    <span><span class="oi oi-clock"></span> {{ recipe.ready_in_minutes }}min </span>
+                    <span style="float: right"> {{ recipe.price_per_serving|floatformat:"1" }}$</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+
+    <form id="add_like" method="POST" action="{% url 'add_like' recipe.id %}">
+        {% csrf_token%}
+        <input type="hidden">
+    </form>
+
+    <form id="add_dislike" method="POST" action="{% url 'add_dislike' recipe.id %}">
+        {% csrf_token%}
+        <input type="hidden">
+    </form>
+
+
+{% endblock %}
